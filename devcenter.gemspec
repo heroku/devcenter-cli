@@ -16,6 +16,7 @@ Gem::Specification.new do |gem|
   gem.executables   = %w{ devcenter }
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = %w{ lib vendor }
+  gem.add_runtime_dependency('listen', '~> 0.7.2')
   gem.add_runtime_dependency('commander', '~> 4.1.3')
   gem.add_runtime_dependency('json', '~>1.7.6')
   gem.add_runtime_dependency('excon', '~>0.15.4')
