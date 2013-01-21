@@ -13,7 +13,10 @@ command :open do |c|
   c.summary = 'Open the article with the given slug in the default browser'
   c.description = c.summary
   c.example 'devcenter open process-model', 'Opens https://devcenter.heroku.com/articles/process-model in the default browser'
+  c.option '--debug', 'Output internal log to help debugging'
   c.action do |args, options|
+    options.default :debug => false
+    Devcenter::Logger.active = options.debug
     Devcenter::Commands::Open.run(args[0])
   end
 end
@@ -24,8 +27,10 @@ command :pull do |c|
   c.description = c.summary
   c.example 'devcenter pull process-model', 'Saves the content of the article with the "process-model" slug to a local process-model.md file in the current directory'
   c.option '--force', 'Skip confirmation and overwrite existing local file'
+  c.option '--debug', 'Output internal log to help debugging'
   c.action do |args, options|
-    options.default :force => false
+    options.default :force => false, :debug => false
+    Devcenter::Logger.active = options.debug
     Devcenter::Commands::Pull.run(args[0], options.force)
   end
 end
@@ -38,8 +43,10 @@ command :preview do |c|
 
   c.option '--host HOST', String, 'Host where the preview will be available'
   c.option '--port PORT_NUMBER', Integer, 'Port where the preview will be available'
+  c.option '--debug', 'Output internal log to help debugging'
   c.action do |args, options|
-    options.default :host => '127.0.0.1', :port => 3000
+    options.default :host => '127.0.0.1', :port => 3000, :debug => false
+    Devcenter::Logger.active = options.debug
     Devcenter::Commands::Preview.run(args[0], options.host, options.port)
   end
 end

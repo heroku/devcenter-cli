@@ -2,6 +2,8 @@ module Devcenter::Previewer
 
   class WebApp < Sinatra::Base
 
+    include Devcenter::Logger
+
     set :logging, false
     set connections: []
     set :public_folder, File.dirname(__FILE__)
@@ -17,17 +19,34 @@ module Devcenter::Previewer
     get '/stream', provides: 'text/event-stream' do
       stream :keep_open do |conn|
         settings.connections << conn
-        conn.callback { settings.connections.delete(conn) } # connection closed properly
-        conn.errback do # connection closed due to an error
+        log "New incoming connection (#{settings.connections.size} open)"
+
+        # refresh connection before browser times out
+        EventMachine::PeriodicTimer.new(20) do
+          log "Refreshing connection"
+          conn << ":refreshing \n\n"
+        end
+
+        conn.callback do
+          settings.connections.delete(conn)
+          log "Connection closed locally (#{settings.connections.size} open)"
+        end
+
+        conn.errback do
           conn.close
           settings.connections.delete(conn)
+          settings.connections.delete(conn)
+          log "Connection closed externally (#{settings.connections.size} open)"
         end
       end
     end
 
     get '/:slug' do
+      log "Local article requested: #{params[:slug]}"
       src_path = File.join(Dir.pwd, "#{params[:slug]}.md")
+      log "Parsing"
       @article = parse_article(src_path)
+      log "Serving"
       erb :article
     end
 
@@ -45,6 +64,7 @@ module Devcenter::Previewer
     end
 
     def self.send_server_event
+      Devcenter::Logger.log "Serving server side event to #{settings.connections.size} connections"
       settings.connections.each do |conn|
         conn << "data: reload\n\n"
       end

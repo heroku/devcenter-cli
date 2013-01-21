@@ -7,6 +7,7 @@ module Devcenter::Commands
 
   class Base
 
+    include Devcenter::Logger
     include Devcenter::Helpers
 
     def self.run(*args)
@@ -43,5 +44,6 @@ module Devcenter::Commands
       say message.join("\n")
       exit
     end
+
   end
 end

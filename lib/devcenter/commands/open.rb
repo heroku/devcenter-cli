@@ -15,14 +15,13 @@ module Devcenter::Commands
 
     def run
       url = article_url(@slug)
+      log "Connecting to #{url}"
       head = Excon.head(url)
       case head.status
       when 200
-        say("Opening #{@slug} docs")
+        log "Page found, opening"
         launchy = Launchy.open(url)
-        if launchy.respond_to?(:join)
-          launchy.join
-        end
+        launchy.join if launchy.respond_to?(:join)
       when 301, 302
         say "Redirected to #{head.headers['Location']}"
       when 404

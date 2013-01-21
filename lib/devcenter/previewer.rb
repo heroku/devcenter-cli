@@ -11,6 +11,7 @@ module Devcenter::Previewer
   def preview(slug, md_path, host, port)
     server = WebServer.new(host, port, WebApp, true)
     file_listener_callback = Proc.new do |modified, added, removed|
+      modified.each{ |f| Devcenter::Logger.log "File modified: #{f}" }
       WebApp.send_server_event
     end
 
