@@ -5,7 +5,7 @@ module Devcenter::Previewer
     include Devcenter::Logger
 
     set :logging, false
-    set connections: []
+    set :connections, []
     set :public_folder, File.dirname(__FILE__)
     set :views, File.join(File.dirname(__FILE__), 'views')
 
@@ -34,7 +34,6 @@ module Devcenter::Previewer
 
         conn.errback do
           conn.close
-          settings.connections.delete(conn)
           settings.connections.delete(conn)
           log "Connection closed externally (#{settings.connections.size} open)"
         end
