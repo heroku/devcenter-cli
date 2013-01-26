@@ -1,3 +1,5 @@
+require 'sinatra'
+
 module Devcenter::Previewer
 
   class WebApp < Sinatra::Base

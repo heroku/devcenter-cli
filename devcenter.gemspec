@@ -15,7 +15,7 @@ Gem::Specification.new do |gem|
   gem.files         = `git ls-files`.split($/)
   gem.executables   = %w{ devcenter }
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
-  gem.require_paths = %w{ lib vendor }
+  gem.require_paths = %w{ lib }
   gem.add_runtime_dependency('listen', '~> 0.7.2')
   gem.add_runtime_dependency('commander', '~> 4.1.3')
   gem.add_runtime_dependency('json', '~>1.7.6')
@@ -27,5 +27,6 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency('thin', '~>1.5.0')
   gem.add_runtime_dependency('rack', '~>1.4.4')
   gem.add_runtime_dependency('rack-protection', '~>1.3.2')
+  gem.add_runtime_dependency('sinatra', '~>1.3.4')
   gem.add_runtime_dependency('tilt', '~>1.3.3')
 end
