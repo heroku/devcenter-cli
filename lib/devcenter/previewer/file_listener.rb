@@ -12,11 +12,12 @@ module Devcenter::Previewer
     end
 
     def start
-      @listener.start(false) # non-blocking
+      @thread = Thread.new { @listener.start }
     end
 
     def stop
       @listener.stop
+      Thread.kill(@thread)
     end
   end
 
