@@ -34,6 +34,10 @@ Get help about a specific command
 
     $ devcenter help pull
 
+### Development
+
+If you have a Dev Center instance, you can point your CLI to it by setting the `DEVCENTER_BASE_URL` env. var (e.g: `export DEVCENTER_BASE_URL=http://localhost:3000`).
+
 ## License
 
 See LICENSE.txt file.
