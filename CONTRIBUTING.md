@@ -11,4 +11,4 @@ We welcome contributions!
 * Make commits of logical units.
 * Check for unnecessary whitespace with `git --diff` before commiting.
 * Push your changes to a topic branch in the main repository.
-* Submit a pull request to the base branch.# Contributing to this repo
+* Submit a pull request to the base branch.
