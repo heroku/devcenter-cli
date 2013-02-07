@@ -50,3 +50,5 @@ command :preview do |c|
     Devcenter::Commands::Preview.run(args[0], options.host, options.port)
   end
 end
+
+default_command :help
