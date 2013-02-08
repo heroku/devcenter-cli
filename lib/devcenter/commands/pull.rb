@@ -3,7 +3,7 @@ module Devcenter::Commands
   class Pull < Base
 
     def initialize(*args)
-      @slug = args[0]
+      @slug = slug_from_article_url(args[0])
       @force_overwrite = args[1]
       super
     end
