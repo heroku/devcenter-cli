@@ -26,6 +26,7 @@ command :pull do |c|
   c.summary = 'Save an editable copy of an article in your current directory'
   c.description = c.summary
   c.example 'devcenter pull process-model', 'Saves the content of the article with the "process-model" slug to a local process-model.md file in the current directory'
+  c.example 'devcenter pull https://devcenter.heroku.com/articles/process-model', 'Saves the content of the article with the provided URL'
   c.option '--force', 'Skip confirmation and overwrite existing local file'
   c.option '--debug', 'Output internal log to help debugging'
   c.action do |args, options|
