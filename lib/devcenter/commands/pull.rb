@@ -10,7 +10,7 @@ module Devcenter::Commands
 
     def validate
       unless @slug && !@slug.strip.empty?
-        @validation_errors << 'Please provide a slug (e.g: ps is the slug for https://devcenter.heroku.com/articles/ps)'
+        @validation_errors << 'Please provide an article slug or full (e.g: ps or https://devcenter.heroku.com/articles/ps)'
       end
     end
 

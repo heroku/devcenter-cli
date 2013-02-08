@@ -23,6 +23,7 @@ module Devcenter::Helpers
   end
 
   def slug_from_article_url(url)
+    return nil unless url
     url.split('/articles/').last.split('?').first.split('#').first
   end
 
