@@ -14,7 +14,13 @@ CLI to interact with Heroku's Dev Center
 
 ### Save a local copy of an article
 
-    $ devcenter pull error-pages
+You can pull an article from its slug
+
+    $ devcenter pull article-slug
+
+or from its URL:
+
+    $ devcenter pull https://devcenter.heroku.com/articles/article-slug
 
 This will save an `article-slug.md` text file in your local directory. The file includes some metadata (article title and id) followed by the article content in markdown format. You can edit both the title and the content, but **never overwrite the article id**.
 

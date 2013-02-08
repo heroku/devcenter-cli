@@ -23,7 +23,7 @@ module Devcenter::Helpers
   end
 
   def slug_from_article_url(url)
-    url.split('/articles/').last.chomp("?preview=true")
+    url.split('/articles/').last.split('?').first.split('#').first
   end
 
   def md_file_path(slug)
