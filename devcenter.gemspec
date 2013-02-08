@@ -6,7 +6,7 @@ require 'devcenter/version'
 Gem::Specification.new do |gem|
   gem.name          = "devcenter"
   gem.version       = Devcenter::VERSION
-  gem.authors       = ["Raul Murciano"]
+  gem.authors       = ["Raul Murciano", "Clint Shryock"]
   gem.email         = ["raul@heroku.com"]
   gem.description   = %q{CLI to interact with Heroku's Dev Center}
   gem.summary       = %q{CLI to interact with Heroku's Dev Center}
