@@ -31,7 +31,7 @@ module Devcenter::Commands
 
     def article_not_found!(slug)
       message = ["No #{slug} article found."]
-      suggestions = JSON.parse(Excon.get(search_api_url, :query => { :q => slug, :source => 'devcenter-cli' }).body)['devcenter']
+      suggestions = JSON.parse(Devcenter::Client.get(:path => search_api_path, :query => { :q => slug, :source => 'devcenter-cli' }).body)['devcenter']
       suggestions.select!{ |s| article_url?(s['full_url']) }
       suggestions.each{ |s| s['slug'] = slug_from_article_url(s['full_url']) }
       unless suggestions.empty?

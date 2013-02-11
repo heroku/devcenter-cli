@@ -15,7 +15,7 @@ module Devcenter::Commands
     end
 
     def run
-      response = Excon.get(article_api_url(@slug))
+      response = Devcenter::Client.get(path: article_api_path(@slug))
       article_received = response.status == 200 && JSON.parse(response.body)['article'] && JSON.parse(response.body)['article']['id']
       article_not_found!(@slug) unless article_received
 

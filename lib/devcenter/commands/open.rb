@@ -14,13 +14,13 @@ module Devcenter::Commands
     end
 
     def run
-      url = article_url(@slug)
-      log "Connecting to #{url}"
-      head = Excon.head(url)
+      path = article_path(@slug)
+      log "Connecting to #{path}"
+      head = Devcenter::Client.head(:path => path)
       case head.status
       when 200
         log "Page found, opening"
-        launchy = Launchy.open(url)
+        launchy = Launchy.open(devcenter_base_url + path)
         launchy.join if launchy.respond_to?(:join)
       when 301, 302
         say "Redirected to #{head.headers['Location']}"

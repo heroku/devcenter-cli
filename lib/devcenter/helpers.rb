@@ -4,16 +4,16 @@ module Devcenter::Helpers
     ENV['DEVCENTER_BASE_URL'] || 'https://devcenter.heroku.com'
   end
 
-  def article_url(slug)
-    "#{devcenter_base_url}/articles/#{slug}"
+  def article_path(slug)
+    "/articles/#{slug}"
   end
 
-  def article_api_url(slug)
-    "#{article_url(slug)}.json"
+  def article_api_path(slug)
+    "#{article_path(slug)}.json"
   end
 
-  def search_api_url
-    "#{devcenter_base_url}/articles.json"
+  def search_api_path
+    "/articles.json"
   end
 
   def article_url?(url)
