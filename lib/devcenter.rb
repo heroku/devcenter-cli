@@ -1,4 +1,5 @@
 require_relative 'devcenter/version'
+require_relative 'devcenter/gem_version_checker'
 require_relative 'devcenter/logger'
 require_relative 'devcenter/helpers'
 require_relative 'devcenter/client'

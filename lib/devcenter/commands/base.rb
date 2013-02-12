@@ -11,6 +11,11 @@ module Devcenter::Commands
     include Devcenter::Helpers
 
     def self.run(*args)
+      if Devcenter::GemVersionChecker.new_version_available?
+        say "devcenter has a new version available, please update with: gem install devcenter"
+        return unless agree('Continue executing your command? (yes/no)')
+      end
+
       command = self.new(*args)
     end
 
