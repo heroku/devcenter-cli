@@ -2,10 +2,51 @@
 require 'maruku'
 require 'nokogiri'
 require 'coderay'
+require 'sanitize'
 
 module Devcenter::MdParser
   class InvalidMarkdownError < Exception; end
   class InvalidRawHTMLError < Exception; end
+
+  def self.to_html(markdown)
+    html = to_unsanitized_html(markdown)
+    html = sanitize(html)
+    highlight(html)
+  end
+
+  def self.to_unsanitized_html(markdown)
+    html = Maruku.new(markdown, :on_error => :raise).to_html
+    html = Nokogiri::HTML::DocumentFragment.parse(html).to_html(:encoding => 'utf-8')
+    verify_raw_html(html)
+    html = underscores_to_dashes_in_subheader_anchors(html)
+  rescue InvalidRawHTMLError => e
+    raise InvalidMarkdownError, e.message
+  rescue => e
+    raise InvalidMarkdownError, parse_maruku_error(e.message)
+  end
+
+  def self.sanitize(html)
+    Sanitize.clean(html, sanitize_config)
+  end
+
+  def self.sanitize_config
+    return @@sanitize_config if defined?(@@sanitize_config)
+    config = Sanitize::Config::RELAXED
+    config[:attributes][:all] += %w{ id class style name width height border align }
+    config[:attributes]['a'] += %w{ target }
+    config[:elements] += %w{ div span hr tt }
+
+    # embedded videos
+    config[:attributes][:all] += %w{ value src type allowscriptaccess allowfullscreen }
+    config[:elements] += %w{ object param embed }
+    config[:add_attributes] = {
+      'object' => {'allowscriptaccess' => 'never'},
+      'embed' => {'allowscriptaccess' => 'never'},
+      'param' => {'allowscriptaccess' => 'never'}
+    }
+
+    @@sanitize_config = config.merge({remove_contents: true, allow_comments: true})
+  end
 
   def self.highlight(html)
     element = "pre>code"
@@ -37,19 +78,9 @@ module Devcenter::MdParser
     end
   end
 
-  def self.to_html(markdown)
-    html = Maruku.new(markdown, :on_error => :raise).to_html
-    verify_raw_html(html)
-    html = underscores_to_dashes_in_subheader_anchors(html)
-    highlight(html)
-  rescue InvalidRawHTMLError => e
-    raise InvalidMarkdownError, e.message
-  rescue => e
-    raise InvalidMarkdownError, parse_maruku_error(e.message)
-  end
-
   def self.underscores_to_dashes_in_subheader_anchors(html)
     doc = Nokogiri::HTML::DocumentFragment.parse(html)
+
     doc.css("h2,h3,h4,h5,h6").each do |node|
       if node.attributes['id'] && node.attributes['id'].value
         node.attributes['id'].value = node.attributes['id'].value.gsub(/_+/,'-')

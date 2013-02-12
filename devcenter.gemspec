@@ -22,6 +22,7 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency('excon', '~>0.15.4')
   gem.add_runtime_dependency('launchy', '~>2.1.0')
   gem.add_runtime_dependency('maruku', '~>0.6.1')
+  gem.add_runtime_dependency('sanitize', '~>2.0.3')
   gem.add_runtime_dependency('nokogiri', '~>1.5.5')
   gem.add_runtime_dependency('coderay', '~>1.0.8')
   gem.add_runtime_dependency('thin', '~>1.5.0')
