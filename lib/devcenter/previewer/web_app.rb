@@ -45,10 +45,17 @@ module Devcenter::Previewer
     get '/:slug' do
       log "Local article requested: #{params[:slug]}"
       src_path = File.join(Dir.pwd, "#{params[:slug]}.md")
-      log "Parsing"
-      @article = parse_article(src_path)
-      log "Serving"
-      erb :article
+      if File.exists?(src_path)
+        log "Parsing"
+        @article = parse_article(src_path)
+        @page_title = @article.metadata.title
+        log "Serving"
+        erb :article
+      else
+        @referrer_url = request.referrer
+        @page_title = 'Not found'
+        erb :not_found
+      end
     end
 
     def parse_article(src_path)
