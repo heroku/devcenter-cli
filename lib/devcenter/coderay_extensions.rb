@@ -1,6 +1,8 @@
+require 'coderay'
+
 module CodeRay
 
-  # Silent warnings
+  # Silence warnings
   module Encoders
     class Encoder
       def << token
@@ -13,29 +15,40 @@ module CodeRay
     end
   end
 
-  # Add terminal scanner
-  # author: Vincent Landgraf <setcool@gmx.de>
-  # modified by Raul Murciano <raul@murciano.net>
-  # licence: GPLv2.1
   module Scanners
+
+    # author: Vincent Landgraf <setcool@gmx.de>
+    # modified by Raul Murciano <raul@murciano.net>
+    # licence: GPLv2.1
 
     class Term < Scanner
 
       register_for :term
 
-      def scan_tokens(tokens, options)
-        prev = nil
-
+      def scan_tokens (tokens, options)
         until eos?
           line = scan(/.*?(\n|\z)/)
+
+          # multiline commands
+          while line =~ /\\\n\z/
+            line += scan(/.*?(\n|\z)/)
+          end
+
           if line =~ /\A(\s*\$)/ # command
             tokens << [$1, :comment] # prompt
             line = line[($1.size)..-1]
-            if comment_index = line.index('#')
-              command = line[0..comment_index-1]
-              comment = line[comment_index-1..-1]
-              tokens << [command, :method] if command
-              tokens << [comment, :comment] if comment
+
+            comment_start = line.rindex('#')
+            if comment_start
+              command = line[0..comment_start-1]
+              unfinished_string = command.count('"').odd?
+              if unfinished_string
+                tokens << [line, :method]
+              else
+                comment = line[comment_start..-1]
+                tokens << [command, :method] if command
+                tokens << [comment, :comment] if comment
+              end
             else
               tokens << [line, :method]
             end
@@ -45,11 +58,11 @@ module CodeRay
           prev = line
         end
         return tokens
-      end
-    end
-  end
-end
+      end # scan_tokens
 
+    end # Term
+  end # Scanners
+end # CodeRay
 
 CodeRay::Scanners['java_script'].register_for :nodejs
 

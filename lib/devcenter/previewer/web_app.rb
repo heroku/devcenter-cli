@@ -1,8 +1,11 @@
 require 'sinatra'
+require 'rack/highlighter'
 
 module Devcenter::Previewer
 
   class WebApp < Sinatra::Base
+
+    use Rack::Highlighter, :coderay, { misc: { :css => :class, :element => "pre>code" } }
 
     include Devcenter::Logger
 
