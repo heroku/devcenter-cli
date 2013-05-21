@@ -1,5 +1,6 @@
 require 'sinatra'
 require 'rack/highlighter'
+require 'devcenter-parser'
 
 module Devcenter::Previewer
 
@@ -66,8 +67,9 @@ module Devcenter::Previewer
       src = IO.read(src_path)
       metadata_yaml, article.content = src.split(/\r*\n\r*\n/, 2)
       article.metadata = OpenStruct.new YAML.load(metadata_yaml)
+      markdown_flavour = article.metadata.markdown_flavour || :maruku
       begin
-        article.html = ::Devcenter::MdParser.to_html(article.content)
+        article.html = ::DevcenterParser.to_html(article.content, markdown_flavour.to_sym)
       rescue Exception => e
         article.error = e.to_s
       end

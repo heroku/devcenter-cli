@@ -1,9 +1,15 @@
-    <article>
-      <hgroup><h1><%= @article.metadata.title %></h1>
-        <p class="meta">
-          Local preview.
-        </p>
-      </hgroup>
+<section class="main">
+
+  <article class="article autolink <% 'contributed' if @article.external_owner? %>">
+
+    <header>
+      <h1 class="doc"><%= @article.metadata.title %></h1>
+      <p class="meta">
+        Local Preview.
+      </p>
+    </header>
+
+    <div class="padder">
 
       <% if !@article.html.to_s.empty? %>
         <%= @article.html %>
@@ -19,10 +25,13 @@
       <form class="cli-save" action="<%= devcenter_base_url %>/admin/articles/cli-edit/<%= @article.metadata.id %>" method="POST">
         <input name="_method" type="hidden" value="put">
         <input type="hidden" name="article[title]" value="<%= @article.metadata.title %>">
+        <input type="hidden" name="article[markdown_flavour]" value="<%= @article.metadata.markdown_flavour %>">
         <textarea style="display:none1" name="article[content]">
 <%= @article.content.to_s.lstrip %>
         </textarea>
         <input type="submit" value="Save in Dev Center">
       </form>
+    </div>
 
-    </article>
+  </article>
+</section>

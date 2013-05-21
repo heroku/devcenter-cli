@@ -1,7 +1,6 @@
 # encoding: utf-8
 require_relative 'previewer/web_app'
 require_relative 'previewer/web_server'
-require_relative 'md_parser'
 require_relative 'previewer/file_listener'
 
 module Devcenter::Previewer
