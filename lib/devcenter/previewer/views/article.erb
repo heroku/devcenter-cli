@@ -12,6 +12,16 @@
     <div class="padder">
 
       <% if !@article.html.to_s.empty? %>
+
+        <section id="table-of-contents">
+          <h3 id="toc">Table of Contents</h3>
+          <ul>
+            <% @article.toc.each do |section| %>
+            <li><a href="#<%= section.attr('id') %>"><%= section.inner_text %></a></li>
+            <% end %>
+          </ul>
+        </section>
+
         <%= @article.html %>
       <% elsif @article.error %>
       <div class="cli-preview-error">

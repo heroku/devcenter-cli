@@ -52,6 +52,7 @@ module Devcenter::Previewer
       if File.exists?(src_path)
         log "Parsing"
         @article = parse_article(src_path)
+        @article.toc = Nokogiri::HTML(@article.html).search('h2')
         @page_title = @article.metadata.title
         log "Serving"
         erb :article
