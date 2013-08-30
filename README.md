@@ -47,3 +47,5 @@ If you have a Dev Center instance, you can point your CLI to it by setting the `
 ## License
 
 See LICENSE.txt file.
+
+The `preview` command uses the [Font Awesome](http://fontawesome.io/) vector icons, which have their own [License](https://github.com/FortAwesome/Font-Awesome#license).
