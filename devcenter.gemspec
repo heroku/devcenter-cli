@@ -28,5 +28,5 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency('sinatra', '~>1.3.4')
   gem.add_runtime_dependency('tilt', '~>1.3.3')
   gem.add_runtime_dependency('rack-highlighter', '~>0.2.0')
-  gem.add_runtime_dependency('devcenter-parser', '~>1.3.2')
+  gem.add_runtime_dependency('devcenter-parser', '~>1.3.4')
 end
