@@ -1,4 +1,4 @@
-# Devcenter
+# Dev Center CLI
 
 CLI to interact with Heroku's Dev Center
 
