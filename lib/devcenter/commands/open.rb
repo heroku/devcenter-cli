@@ -16,15 +16,14 @@ module Devcenter::Commands
     def run
       path = article_path(@slug)
       log "Connecting to #{path}"
-      head = Devcenter::Client.head(:path => path)
-      case head.status
-      when 200
+      response = Devcenter::Client.head(:path => path)
+      if response.ok?
         log "Page found, opening"
         launchy = Launchy.open(devcenter_base_url + path)
         launchy.join if launchy.respond_to?(:join)
-      when 301, 302
-        say "Redirected to #{head.headers['Location']}"
-      when 404
+      elsif response.redirect?
+        abort "Redirected to #{response.location}"
+      elsif response.not_found?
         article_not_found!(@slug)
       end
     end

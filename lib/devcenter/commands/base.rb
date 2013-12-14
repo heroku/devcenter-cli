@@ -24,6 +24,7 @@ module Devcenter::Commands
       validate
       if @validation_errors.any?
         @validation_errors.each{ |e| say e }
+        abort
       else
         run
       end
@@ -36,7 +37,8 @@ module Devcenter::Commands
 
     def article_not_found!(slug)
       message = ["No #{slug} article found."]
-      suggestions = JSON.parse(Devcenter::Client.get(:path => search_api_path, :query => { :q => slug, :source => 'devcenter-cli' }).body)['devcenter']
+      response = Devcenter::Client.get(:path => search_api_path, :query => { :q => slug, :source => 'devcenter-cli' })
+      suggestions = response.body['devcenter']
       suggestions.select!{ |s| article_url?(s['full_url']) }
       suggestions.each{ |s| s['slug'] = slug_from_article_url(s['full_url']) }
       unless suggestions.empty?
@@ -46,8 +48,7 @@ module Devcenter::Commands
           message << "  %-#{longest}s # %s" % [suggestion['slug'], suggestion['title']]
         end
       end
-      say message.join("\n")
-      exit
+      abort message.join("\n")
     end
 
   end

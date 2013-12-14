@@ -27,15 +27,13 @@ module Devcenter::Commands
       email = ask('Email:    ')
       password = ask('Password: ') { |q| q.echo = '*' }
       response = Devcenter::Client.get_oauth_token(email, password)
-      body = JSON.parse(response.body)
-      case response.status
-      when 401
+      if response.access_denied?
         abort "Authentication error: bad credentials. Please try again."
-      when 201
-        token = body['access_token']['token']
+      elsif response.ok?
+        token = response.body['access_token']['token']
         push_article(token) if validate_article(token)
       else
-        abort "Authentication error: #{body['message']}"
+        abort "Authentication error: #{response.body['message']}"
       end 
     end
 
@@ -47,7 +45,7 @@ module Devcenter::Commands
         'article[parser]' => @article.metadata.parser || @article.metadata.markdown_flavour
       }
       response = Devcenter::Client.validate_article(token, article_id, article_params)
-      errors = JSON.parse(response.body)
+      errors = response.body
       if errors.any?
         say "The article \"#{@slug}\" is not valid:"
         abort errors.to_yaml.gsub(/\A(\-+)\n-/, '')
@@ -65,10 +63,10 @@ module Devcenter::Commands
         'article[parser]' => @article.metadata.parser || @article.metadata.markdown_flavour
       }
       response = Devcenter::Client.update_article(token, article_id, article_params)
-      if response.status == 200
+      if response.ok?
         say "\"#{@slug}\" pushed successfully."
       else
-        error = JSON.parse(response.body)['error']
+        error = response.body['error']
         abort "Error pushing \"#{@slug}\": #{error}"
       end
     end
