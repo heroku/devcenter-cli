@@ -49,6 +49,11 @@ module Devcenter
       auth_request(:put, token, path: update_article_path(article_id), body: form, :headers => { "Content-Type" => "application/x-www-form-urlencoded" })
     end
 
+    def check_broken_links(token, content, parser)
+      form = URI.encode_www_form({content: content, parser: parser})
+      auth_request(:post, token, path: broken_link_checks_path, body: form, :headers => { "Content-Type" => "application/x-www-form-urlencoded" })
+    end
+
     def response(request_call)
       Response.new request_call
     end

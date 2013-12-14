@@ -6,6 +6,10 @@ module Devcenter::Helpers
     ENV['DEVCENTER_BASE_URL'] || 'https://devcenter.heroku.com'
   end
 
+  def broken_link_checks_path
+    '/api/v1/private/broken-link-checks.json'
+  end
+
   def article_path(slug)
     "/articles/#{slug}"
   end
