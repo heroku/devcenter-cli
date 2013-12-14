@@ -36,6 +36,19 @@ command :pull do |c|
   end
 end
 
+command :push do |c|
+  c.syntax = 'devcenter push [options]'
+  c.summary = 'Submit the content of a local article to Dev Center'
+  c.description = c.summary
+  c.example 'devcenter push process-model.md', 'Submits the content of the local "process-model.md" file to the article with the "process-model" slug in Dev Center'
+  c.option '--debug', 'Output internal log to help debugging'
+  c.action do |args, options|
+    options.default :debug => false
+    Devcenter::Logger.active = options.debug
+    Devcenter::Commands::Push.run(args[0], options.force)
+  end
+end
+
 command :preview do |c|
   c.syntax = 'devcenter preview [options]'
   c.summary = 'Opens a live preview for a given article file'

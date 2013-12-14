@@ -16,6 +16,14 @@ module Devcenter::Helpers
     "/articles.json"
   end
 
+  def validate_article_path(id)
+    "/api/v1/private/articles/#{id}/validate.json"
+  end
+
+  def update_article_path(id)
+    "/api/v1/private/articles/#{id}.json"
+  end
+
   def article_url?(url)
     escaped_base_url = devcenter_base_url.gsub('/','\\/')
     url.match(/\A#{escaped_base_url}\/articles\/.+/)

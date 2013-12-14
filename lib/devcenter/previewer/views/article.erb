@@ -1,6 +1,6 @@
 <section class="main">
 
-  <article class="article autolink <% 'contributed' if @article.external_owner? %>">
+  <article class="article autolink">
 
     <header>
       <h1 class="doc"><%= @article.metadata.title %></h1>
@@ -23,24 +23,14 @@
         </section>
 
         <%= @article.html %>
-      <% elsif @article.error %>
+      <% elsif @article.parsing_error %>
       <div class="cli-preview-error">
         <h4>Parsing error:</h4>
         <p>
-          <%= @article.error %>
+          <%= @article.parsing_error %>
         </p>
       </div>
       <% end %>
-
-      <form class="cli-save" action="<%= devcenter_base_url %>/admin/articles/cli-edit/<%= @article.metadata.id %>" method="POST">
-        <input name="_method" type="hidden" value="put">
-        <input type="hidden" name="article[title]" value="<%= @article.metadata.title %>">
-        <input type="hidden" name="article[markdown_flavour]" value="<%= @article.metadata.markdown_flavour %>">
-        <textarea style="display:none" name="article[content]">
-<%= CGI.escapeHTML(@article.content.to_s.lstrip) %>
-        </textarea>
-        <input type="submit" value="Save in Dev Center">
-      </form>
     </div>
 
   </article>

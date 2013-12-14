@@ -1,6 +1,5 @@
 require 'sinatra'
 require 'rack/highlighter'
-require 'devcenter-parser'
 
 module Devcenter::Previewer
 
@@ -51,8 +50,7 @@ module Devcenter::Previewer
       src_path = File.join(Dir.pwd, "#{params[:slug]}.md")
       if File.exists?(src_path)
         log "Parsing"
-        @article = parse_article(src_path)
-        @article.toc = Nokogiri::HTML(@article.html).search('h2')
+        @article = Devcenter::ArticleFile.read(src_path)
         @page_title = @article.metadata.title
         log "Serving"
         erb :article
@@ -61,20 +59,6 @@ module Devcenter::Previewer
         @page_title = 'Not found'
         erb :not_found
       end
-    end
-
-    def parse_article(src_path)
-      article = OpenStruct.new
-      src = IO.read(src_path)
-      metadata_yaml, article.content = src.split(/\r*\n\r*\n/, 2)
-      article.metadata = OpenStruct.new YAML.load(metadata_yaml)
-      markdown_flavour = article.metadata.markdown_flavour || :maruku
-      begin
-        article.html = ::DevcenterParser.to_html(article.content, markdown_flavour.to_sym)
-      rescue Exception => e
-        article.error = e.to_s
-      end
-      article
     end
 
     def self.send_server_event
