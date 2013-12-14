@@ -30,6 +30,12 @@ This will save an `article-slug.md` text file in your local directory. The file 
 
 This will open a preview in your default browser and get it refreshed when you save the file. You can specify `--port` and `--host` options to customize the preview web server.
 
+### Update an article in Dev Center from a local file
+
+    $ devcenter push dynos
+
+This will save the title and content from your local article in Dev Center. You'll be asked to authenticate to verify that you have permissions to update the article.
+
 ### Help
 
 Get available commands
