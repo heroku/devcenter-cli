@@ -23,18 +23,8 @@ module Devcenter::Commands
       if @article.parsing_error
         abort "The content of #{@md_path} can't be parsed properly, fix it and try again."
       end
-      say 'Authenticate with your Heroku account:'
-      email = ask('Email:    ')
-      password = ask('Password: ') { |q| q.echo = '*' }
-      response = Devcenter::Client.get_oauth_token(email, password)
-      if response.access_denied?
-        abort "Authentication error: bad credentials. Please try again."
-      elsif response.ok?
-        token = response.body['access_token']['token']
-        push_article(token) if validate_article(token)
-      else
-        abort "Authentication error: #{response.body['message']}"
-      end 
+      token = get_oauth_token
+      push_article(token) if token && validate_article(token)
     end
 
     def validate_article(token)
@@ -69,6 +59,6 @@ module Devcenter::Commands
         error = response.body['error']
         abort "Error pushing \"#{@slug}\": #{error}"
       end
-    end
+    end    
   end
 end

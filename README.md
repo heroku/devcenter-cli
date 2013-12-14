@@ -34,7 +34,7 @@ This will open a preview in your default browser and get it refreshed when you s
 
     $ devcenter push dynos
 
-This will save the title and content from your local article in Dev Center. You'll be asked to authenticate to verify that you have permissions to update the article.
+This will save the title and content from your local article in Dev Center, using your Heroku credentials from `~/.netrc`, which you can set by doing `heroku auth:login`.
 
 ### Help
 

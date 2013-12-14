@@ -1,3 +1,5 @@
+require 'netrc'
+
 module Devcenter::Helpers
 
   def devcenter_base_url
@@ -45,6 +47,13 @@ module Devcenter::Helpers
 
   def write_file(filename, content)
     File.open(filename, 'w'){ |f| f.write(content) }
+  end
+
+  def get_oauth_token
+    netrc = Netrc.read
+    user, token = netrc['api.heroku.com']
+    abort 'Heroku credentials not found. Execute "heroku login" to create them.' unless token
+    token
   end
 
 end
