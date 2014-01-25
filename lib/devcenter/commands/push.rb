@@ -66,11 +66,24 @@ module Devcenter::Commands
       }
       response = Devcenter::Client.update_article(token, article_id, article_params)
       if response.ok?
-        say "Article \"#{@slug}\" pushed successfully."
+        body = response.body
+        verb = case body['status']
+        when 'published'
+          'published'
+        when 'published_quietly'
+          'published quietly'
+        when 'draft'
+          'pushed in draft mode'
+        when 'archived'
+          'archived'
+        when 'staging'
+          'pushed as staging mode'
+        end
+        say "Article \"#{body['title']}\" #{verb} to #{body['url']}"
       else
         error = response.body['error']
         abort "Error pushing \"#{@slug}\": #{error}"
       end
-    end    
+    end
   end
 end

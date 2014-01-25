@@ -94,7 +94,7 @@ module Devcenter
                     "Authorization" => "Basic #{auth}"
                 })
     end
-  
+
     def encode64(str)
       Base64.encode64(str).strip
     end
