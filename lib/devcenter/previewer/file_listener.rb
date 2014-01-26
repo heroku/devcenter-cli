@@ -16,7 +16,7 @@ module Devcenter::Previewer
     end
 
     def stop
-      @listener.stop
+      @listener.stop rescue ThreadError
       Thread.kill(@thread)
     end
   end
