@@ -16,21 +16,26 @@ module Devcenter::Previewer
 
     listener = FileListener.new(md_path, file_listener_callback)
 
-    [:INT, :TERM].each do |signal|
-      trap(signal) do
-        listener.stop
-        server.stop
-        say "\nPreview finished."
-        exit
-      end
-    end
+    server.start
     listener.start
+
     url = "http://#{host}:#{port}/#{slug}"
     say "\nLive preview for #{slug} available in #{url}"
     say "It will refresh when you save #{md_path}"
     say "Press Ctrl+C to exit...\n"
     Launchy.open(url)
-    server.start
+
+    running = true
+    [:INT, :TERM].each do |signal|
+      trap(signal) do
+        listener.stop
+        server.stop
+        running = false
+        say "\nPreview finished."
+        exit
+      end
+    end
+    sleep 1 while running
   end
 
 end

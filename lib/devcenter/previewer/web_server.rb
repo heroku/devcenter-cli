@@ -10,11 +10,12 @@ module Devcenter::Previewer
     end
 
     def start
-      @server.start
+      @thread = Thread.new { @server.start }
     end
 
     def stop
       @server.stop
+      Thread.kill(@thread)
     end
   end
 
