@@ -6,7 +6,7 @@ module Devcenter::Previewer
     def initialize(file_path, callback)
       dir = File.dirname(file_path)
       basename = File.basename(file_path)
-      @listener = Listen.to(dir, force_polling: true)
+      @listener = Listen.to(dir)
       @listener.filter(%r{#{basename}})
       @listener.change(&callback)
     end
