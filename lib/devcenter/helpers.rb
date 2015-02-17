@@ -54,10 +54,19 @@ module Devcenter::Helpers
   end
 
   def get_oauth_token
-    netrc = Netrc.read
+    netrc = Netrc.read(netrc_path)
     user, token = netrc['api.heroku.com']
     abort 'Heroku credentials not found. Execute "heroku login" to create them.' unless token
     token
   end
 
+  def netrc_path
+    default = Netrc.default_path
+    encrypted = default + ".gpg"
+    if File.exists?(encrypted)
+      encrypted
+    else
+      default
+    end
+  end
 end
