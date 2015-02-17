@@ -18,7 +18,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = %w{ lib }
   gem.add_runtime_dependency('listen', '~> 1.3.1')
   gem.add_runtime_dependency('commander', '~> 4.1.3')
-  gem.add_runtime_dependency('json', '~>1.7.6')
+  gem.add_runtime_dependency('json', '~>1.8', '>= 1.8.2')
   gem.add_runtime_dependency('excon', '~>0.15.4')
   gem.add_runtime_dependency('launchy', '~>2.1.0')
   gem.add_runtime_dependency('coderay', '~>1.0.8')
