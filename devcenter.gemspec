@@ -29,5 +29,5 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency('tilt', '~>1.3.3')
   gem.add_runtime_dependency('rack-highlighter', '~>0.2.0')
   gem.add_runtime_dependency('devcenter-parser', '~>1.4.2')
-  gem.add_runtime_dependency('netrc', '~>0.7.7')
+  gem.add_runtime_dependency('netrc', '~>0.10', '>= 0.10.2')
 end
