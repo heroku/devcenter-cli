@@ -9,9 +9,8 @@ module Devcenter
     def initialize(opts = {})
       @metadata = opts[:metadata] || OpenStruct.new
       @content = opts[:content] || ''
-      markdown_flavour = @metadata.markdown_flavour || :maruku
       begin
-        @html = ::DevcenterParser.to_html(@content, markdown_flavour.to_sym)
+        @html = ::DevcenterParser.to_html(@content, :github)
       rescue Exception => e
         @parsing_error = e.to_s
         @html = ''
@@ -22,8 +21,7 @@ module Devcenter
     def self.read(src_path)
       src = IO.read(src_path)
       metadata_yaml, content = src.split(/\r*\n\r*\n/, 2)
-      metadata = OpenStruct.new YAML.load(metadata_yaml)
-      markdown_flavour = metadata.markdown_flavour || :maruku
+      metadata = OpenStruct.new Psych.load(metadata_yaml)
       new(metadata: metadata, content: content)
     end
 

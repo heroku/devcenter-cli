@@ -36,19 +36,18 @@ module Devcenter::Commands
       article_params = {
         'article[content]' => @article.content,
         'article[title]' => @article.metadata.title,
-        'article[parser]' => @article.metadata.parser || @article.metadata.markdown_flavour
       }
       response = Devcenter::Client.validate_article(token, article_id, article_params)
       errors = response.body
       if errors.any?
         say "The article \"#{@slug}\" can't be saved:"
-        abort errors.to_yaml.gsub(/\A(\-+)\n-/, '')
+        abort Psych.dump(errors).gsub(/\A(\-+)\n-/, '')
       end
       errors.empty?
     end
 
     def display_broken_links(token)
-      response = Devcenter::Client.check_broken_links(token, @article.content, @article.metadata.markdown_flavour)
+      response = Devcenter::Client.check_broken_links(token, @article.content)
       broken_links = response.body
       if broken_links.any?
         say "The article \"#{@slug}\" contains broken link/s:"
@@ -62,7 +61,6 @@ module Devcenter::Commands
       article_params = {
         'article[content]' => @article.content,
         'article[title]' => @article.metadata.title,
-        'article[parser]' => @article.metadata.parser || @article.metadata.markdown_flavour
       }
       response = Devcenter::Client.update_article(token, article_id, article_params)
       if response.ok?

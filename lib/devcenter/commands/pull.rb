@@ -20,7 +20,7 @@ module Devcenter::Commands
       article_not_found!(@slug) unless article_received
 
       article = response.body['article']
-      metadata = {'title' => article['title'], 'id' => article['id'], 'markdown_flavour' => article['markdown_flavour']}
+      metadata = {'title' => article['title'], 'id' => article['id']}
       file_path = md_file_path(@slug)
 
       unless @force_overwrite
@@ -28,7 +28,7 @@ module Devcenter::Commands
         return if cancel_save
       end
 
-      file_content = [metadata.to_yaml, article['content']].join("\n\n")
+      file_content = [Psych.dump(metadata), article['content']].join("\n\n")
       write_file(file_path, file_content)
       say "\"#{metadata['title']}\" article saved as #{file_path}"
     end
