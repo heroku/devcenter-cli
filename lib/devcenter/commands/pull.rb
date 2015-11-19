@@ -28,7 +28,7 @@ module Devcenter::Commands
         return if cancel_save
       end
 
-      file_content = [Psych.dump(metadata), article['content']].join("\n\n")
+      file_content = [YAML.dump(metadata), article['content']].join("\n\n")
       write_file(file_path, file_content)
       say "\"#{metadata['title']}\" article saved as #{file_path}"
     end

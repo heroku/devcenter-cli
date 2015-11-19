@@ -41,7 +41,7 @@ module Devcenter::Commands
       errors = response.body
       if errors.any?
         say "The article \"#{@slug}\" can't be saved:"
-        abort Psych.dump(errors).gsub(/\A(\-+)\n-/, '')
+        abort YAML.dump(errors).gsub(/\A(\-+)\n-/, '')
       end
       errors.empty?
     end

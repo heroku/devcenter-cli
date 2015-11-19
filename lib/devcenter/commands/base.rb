@@ -1,7 +1,7 @@
+require 'yaml'
 require 'excon'
 require 'json'
 require 'launchy'
-require 'psych'
 
 module Devcenter::Commands
 

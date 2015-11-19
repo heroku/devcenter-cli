@@ -1,4 +1,5 @@
 require 'devcenter-parser'
+require 'yaml'
 
 module Devcenter
 
@@ -21,7 +22,7 @@ module Devcenter
     def self.read(src_path)
       src = IO.read(src_path)
       metadata_yaml, content = src.split(/\r*\n\r*\n/, 2)
-      metadata = OpenStruct.new Psych.load(metadata_yaml)
+      metadata = OpenStruct.new YAML.load(metadata_yaml)
       new(metadata: metadata, content: content)
     end
 
