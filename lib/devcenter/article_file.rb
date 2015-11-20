@@ -11,7 +11,7 @@ module Devcenter
       @metadata = opts[:metadata] || OpenStruct.new
       @content = opts[:content] || ''
       begin
-        @html = ::DevcenterParser.to_html(@content, :github)
+        @html = ::DevcenterParser.to_html(@content)
       rescue Exception => e
         @parsing_error = e.to_s
         @html = ''
