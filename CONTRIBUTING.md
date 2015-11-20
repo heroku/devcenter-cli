@@ -3,7 +3,7 @@
 We welcome contributions!
 
 ## Urgent Security Updates
-* Page us from the "Dev Center" campfire room with `Sentinel: page DevCenter: your emergency message`. While you wait for us, push your fix to a topic branch on GitHub.
+* Page us from the "Dev Center" HipChat room. While you wait for us, push your fix to a topic branch on GitHub.
 
 ## Any Other Contribution
 
