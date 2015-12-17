@@ -1,9 +1,11 @@
 <article>
-  <h4>Ooops</h4>
-  <p>
-    You clicked a relative link for a URL not available locally.
-    <% if @referrer_url %>
-      <a href="<%= @referrer_url %>">Return to your article</a>.
-    <% end %>
-  </p>
+  <h1>Ooops</h1>
+  <div class="warning">
+    <p>
+      You clicked a relative link for a URL not available locally.
+      <% if @referrer_url %>
+        <a href="<%= @referrer_url %>">Return to your article</a>.
+      <% end %>
+    </p>
+  </div>
 </article>

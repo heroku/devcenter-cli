@@ -1,37 +1,26 @@
-<section class="main">
-
-  <article class="article autolink">
-
-    <header>
-      <h1 class="doc"><%= @article.metadata.title %></h1>
-      <p class="meta">
-        Local Preview.
-      </p>
-    </header>
-
-    <div class="padder">
-
-      <% if !@article.html.to_s.empty? %>
-
-        <section id="table-of-contents">
-          <h3 id="toc">Table of Contents</h3>
-          <ul>
-            <% @article.toc.each do |section| %>
-            <li><a href="#<%= section.attr('id') %>"><%= section.inner_text %></a></li>
-            <% end %>
-          </ul>
-        </section>
-
-        <%= @article.html %>
-      <% elsif @article.parsing_error %>
-      <div class="cli-preview-error">
-        <h4>Parsing error:</h4>
-        <p>
-          <%= @article.parsing_error %>
-        </p>
-      </div>
-      <% end %>
+<article class="js-autolink">
+  <h1><%= @article.metadata.title %></h1>
+  <p class="last-updated">
+    <span class="icon-clock"></span> Last updated <%= Date.today.strftime("%d %B %Y") %> (Local preview)
+  </p>
+  <% if !@article.html.to_s.empty? %>
+    <div id="table-of-contents">
+      <h3>
+        <span class="icon-list"></span> Table of Contents
+      </h3>
+      <ul>
+        <% @article.toc.each do |section| %>
+          <li><a href="#<%= section.attr('id') %>"><%= section.inner_text %></a></li>
+        <% end %>
+      </ul>
     </div>
+    <%= @article.html %>
+  <% elsif @article.parsing_error %>
+    <div class="warning">
+      <p>
+        Parsing error: <%= @article.parsing_error %>
+      </p>
+    </div>
+  <% end %>
 
-  </article>
-</section>
+</article>

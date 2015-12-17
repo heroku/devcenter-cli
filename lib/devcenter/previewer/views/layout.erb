@@ -1,43 +1,13 @@
 <!DOCTYPE html>
-<html class="no-js" dir="ltr" lang="en">
+<html lang="en">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <title>Preview: <%= @page_title %></title>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=0.5">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
   <meta content="authenticity_token" name="csrf-param">
   <link href="/assets/public.css" media="screen" rel="stylesheet" type="text/css">
-  <!--[if IE 6]>
-      <link href="https://universal-ie6-css.googlecode.com/files/ie6.0.3.css" media="screen" rel="stylesheet" type="text/css" />
-      <![endif]-->
-  <style>
-    .heroku-header-container {
-      max-width: 524px !important;
-    }
-    .cli-preview-error, .cli-preview-error h4 {
-      color: red;
-      line-height: 1.8em;
-    }
-    .cli-save {
-      margin: 2em 0;
-    }
-    .cli-save textarea {
-      display:none;
-    }
-    .cli-save input {
-      padding: 1em 2em;
-    }
-    .preview {
-      font-family: Helvetica, Arial;
-      padding: .4em;
-      font-size: 18px;
-      color: #74d0f4;
-    }
-    .main {
-      float: none !important;
-    }
-  </style>
   <script>
   try {
     var es = new EventSource('/stream');
@@ -53,33 +23,36 @@
   }
   </script>
 </head>
-
   <body>
-    <div class="heroku-header">
-    <div class="heroku-header-container container">
-
-      <div class="heroku-header-hgroup">
-        <a href="/">
-          heroku
-          <strong>dev center</strong>
-        </a>
-      </div>
-
-      <div class="heroku-header-nav">
-        <p class="preview">Local Preview</p>
-      </div>
-    </div>
-    </div>
-
-    <div id="sheet">
-      <div class="sheet-container container">
-        <div class="select-secondary-nav">
-          <select class="js-select-nav"></select>
+    <div class="page-wrapper">
+      <header>
+        <div class="gradient-primary gradient-primary-short">
+          <div class="heroku-header">
+            <div class="container">
+              <a href="#" class="heroku-brand">Heroku Dev Center</a>
+              <ul class="nav">
+                <li class="heroku-nav-item">
+                  <a href="#">Local Preview</a>
+                </li>
+              </ul>
+              <span class="mobile-nav">Show nav</span>
+            </div>
+          </div>
         </div>
-        <ul class="secondary-nav nocontent"></ul>
-
-        <%= yield %>
+      </header>
+      <div class="container">
+        <div class="col-md-8 col-md-offset-4 content">
+          <%= yield %>
+        </div>
       </div>
+      <footer>
+        <div class="container">
+          <ul>
+            <li><a href="https://www.heroku.com/home">heroku.com</a></li>
+            <li><a href="https://www.heroku.com/policy/privacy">Privacy Policy</a></li>
+          </ul>
+        </div>
+      </footer>
     </div>
   </body>
 </html>
