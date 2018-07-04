@@ -19,7 +19,7 @@ module Devcenter::Helpers
   end
 
   def search_api_path
-    "/articles.json"
+    "/api/v1/search.json"
   end
 
   def validate_article_path(id)
@@ -32,8 +32,7 @@ module Devcenter::Helpers
 
   def article_url?(url)
     escaped_base_url = devcenter_base_url.gsub('/','\\/')
-    url.match(/\A#{escaped_base_url}\/articles\/.+/)
-    true
+    url.match?(/\A#{escaped_base_url}\/articles\/.+/)
   end
 
   def slug_from_article_url(url)
