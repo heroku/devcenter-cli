@@ -16,10 +16,10 @@ module Devcenter::Commands
 
     def run
       response = Devcenter::Client.get(path: article_api_path(@slug))
-      article_received = response.ok? && response.body['article'] && response.body['article']['id']
+      article_received = response.ok? && response.body['slug'] == @slug
       article_not_found!(@slug) unless article_received
 
-      article = response.body['article']
+      article = response.body
       metadata = {'title' => article['title'], 'id' => article['id']}
       file_path = md_file_path(@slug)
 
