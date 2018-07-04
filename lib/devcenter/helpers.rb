@@ -19,7 +19,7 @@ module Devcenter::Helpers
   end
 
   def search_api_path
-    "/articles.json"
+    "/api/v1/search.json"
   end
 
   def validate_article_path(id)
