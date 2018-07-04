@@ -32,8 +32,7 @@ module Devcenter::Helpers
 
   def article_url?(url)
     escaped_base_url = devcenter_base_url.gsub('/','\\/')
-    url.match(/\A#{escaped_base_url}\/articles\/.+/)
-    true
+    url.match?(/\A#{escaped_base_url}\/articles\/.+/)
   end
 
   def slug_from_article_url(url)
