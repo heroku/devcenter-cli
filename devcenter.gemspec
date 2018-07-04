@@ -17,7 +17,7 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = %w{ lib }
   gem.add_runtime_dependency('listen', '~> 1.3')
-  gem.add_runtime_dependency('commander', '~> 4.1')
+  gem.add_runtime_dependency('commander', '~> 4.4')
   gem.add_runtime_dependency('json', '~>1.8', '>= 1.8.2')
   gem.add_runtime_dependency('excon', '~>0.45')
   gem.add_runtime_dependency('launchy', '~>2.1')
