@@ -37,10 +37,9 @@ module Devcenter::Commands
 
     def article_not_found!(slug)
       message = ["No #{slug} article found."]
-      response = Devcenter::Client.get(:path => search_api_path, :query => { :q => slug, :source => 'devcenter-cli' })
-      suggestions = response.body['devcenter']
-      suggestions.select!{ |s| article_url?(s['full_url']) }
-      suggestions.each{ |s| s['slug'] = slug_from_article_url(s['full_url']) }
+      response = Devcenter::Client.get(path: search_api_path, query: { query: slug })
+      suggestions = response.body['results']
+      suggestions.select! { |result| article_url?(result['full_url']) }
       unless suggestions.empty?
         message << "Perhaps you meant one of these:"
         longest = suggestions.map {|suggestion| suggestion['slug'].size }.max
