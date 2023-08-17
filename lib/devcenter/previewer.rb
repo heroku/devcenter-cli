@@ -46,11 +46,7 @@ module Devcenter::Previewer
     end
 
     def init_listener
-      file_listener_callback = Proc.new do |modified, added, removed|
-        modified.each{ |f| Devcenter::Logger.log "File modified: #{f}" }
-        WebApp.send_server_event
-      end
-      FileListener.new(md_path, file_listener_callback)
+      FileListener.new(md_path)
     end
 
     def start
