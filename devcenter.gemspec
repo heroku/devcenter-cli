@@ -23,7 +23,7 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency('devcenter-parser', '~> 2.3')
   gem.add_runtime_dependency('excon', '~> 0.100.0')
   gem.add_runtime_dependency('json', '~> 2.3.1')
-  gem.add_runtime_dependency('launchy', '~> 2.4.3')
+  gem.add_runtime_dependency('launchy', '>= 2.4.3', '< 2.6.0')
   gem.add_runtime_dependency('listen', '~> 3.4.1')
   gem.add_runtime_dependency('netrc', '~> 0.11.0')
   gem.add_runtime_dependency('rack', '~> 2.2.8')
