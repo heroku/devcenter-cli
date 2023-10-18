@@ -3,12 +3,12 @@
 We welcome contributions!
 
 ## Urgent Security Updates
-* Page us from the "Dev Center" HipChat room. While you wait for us, push your fix to a topic branch on GitHub.
+* If internal to Salesforce/Heroku, please contact the #marketing-web-ops team on Slack.
 
 ## Any Other Contribution
 
-* Create a topic branch from where you want to base your work (this is usually the `master` branch).
+* Create a topic branch from where you want to base your work (this is usually the `main` branch).
 * Make commits of logical units.
 * Check for unnecessary whitespace with `git --diff` before commiting.
-* Push your changes to a topic branch in the main repository.
+* Push your changes to a topic branch in the GitHub repository.
 * Submit a pull request to the base branch.
