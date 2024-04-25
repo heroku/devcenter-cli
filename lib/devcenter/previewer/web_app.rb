@@ -45,7 +45,7 @@ module Devcenter::Previewer
     get '/:slug' do
       log "Local article requested: #{params[:slug]}"
       src_path = File.join(Dir.pwd, "#{params[:slug]}.md")
-      if File.exists?(src_path)
+      if File.exist?(src_path)
         log "Parsing"
         @article = Devcenter::ArticleFile.read(src_path)
         @page_title = @article.metadata.title

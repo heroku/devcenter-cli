@@ -24,7 +24,7 @@ module Devcenter::Commands
       file_path = md_file_path(@slug)
 
       unless @force_overwrite
-        cancel_save = File.exists?(file_path) && !agree("The file #{file_path} already exists - overwrite? (yes/no)")
+        cancel_save = File.exist?(file_path) && !agree("The file #{file_path} already exists - overwrite? (yes/no)")
         return if cancel_save
       end
 
