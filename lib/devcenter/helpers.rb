@@ -62,7 +62,7 @@ module Devcenter::Helpers
   def netrc_path
     default = Netrc.default_path
     encrypted = default + ".gpg"
-    if File.exists?(encrypted)
+    if File.exist?(encrypted)
       encrypted
     else
       default

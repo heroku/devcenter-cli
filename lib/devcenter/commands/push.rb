@@ -10,7 +10,7 @@ module Devcenter::Commands
 
     def validate
       empty_slug = @slug.nil? || @slug.to_s.strip.empty?
-      file_exists = !empty_slug && File.exists?(@md_path)
+      file_exists = !empty_slug && File.exist?(@md_path)
       if empty_slug
         @validation_errors << 'Please provide an article slug'
       elsif !file_exists
