@@ -96,7 +96,7 @@ module Devcenter
     end
 
     def encode64(str)
-      Base64.encode64(str).strip
+      Base64.strict_encode64(str)
     end
   end
 
