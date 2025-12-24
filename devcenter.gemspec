@@ -26,7 +26,7 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency('launchy', '~> 2.4.3')
   gem.add_runtime_dependency('listen', '~> 3.4.1')
   gem.add_runtime_dependency('netrc', '~> 0.11.0')
-  gem.add_runtime_dependency('rack', '~> 2.2.8')
+  gem.add_runtime_dependency('rack', '>= 2.2.8', '< 3.1.0')
   gem.add_runtime_dependency('rack-protection', '~> 2.2.4')
   gem.add_runtime_dependency('sinatra', '~> 2.2.4')
   gem.add_runtime_dependency('thin', '~> 1.8.2')
