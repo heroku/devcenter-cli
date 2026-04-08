@@ -4,7 +4,6 @@ export default [
   ...oclif,
   {
     ignores: [
-      './lib',
       '**/*.js',
       'dist/**/*',
       'coverage/**/*',

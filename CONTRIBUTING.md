@@ -1,14 +1,14 @@
 # Contributing to this repo
 
-We welcome contributions!
+We welcome contributions.
 
-## Urgent Security Updates
-* If internal to Salesforce/Heroku, please contact the #marketing-web-ops team on Slack.
+## Urgent security updates
 
-## Any Other Contribution
+If internal to Salesforce/Heroku, please contact the **#heroku-front-end-dev-tools** Slack channel or the **@heroku/frontend-dev-tooling** team as appropriate.
 
-* Create a topic branch from where you want to base your work (this is usually the `main` branch).
-* Make commits of logical units.
-* Check for unnecessary whitespace with `git --diff` before commiting.
-* Push your changes to a topic branch in the GitHub repository.
-* Submit a pull request to the base branch.
+## Any other contribution
+
+- Create a topic branch from `main`.
+- Make commits in logical units.
+- Run `npm test` before opening a PR.
+- Open a pull request against `main`.

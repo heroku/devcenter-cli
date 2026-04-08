@@ -1,57 +1,98 @@
 # Dev Center CLI
 
-CLI to interact with Heroku's Dev Center
+Heroku CLI plugin to work with [Heroku Dev Center](https://devcenter.heroku.com) articles from your machine.
 
 ## Installation
 
-    $ gem install devcenter
+Install as a Heroku CLI plugin:
+
+```bash
+heroku plugins:install @heroku-cli/heroku-cli-plugin-devcenter
+```
+
+For local development, from this repository:
+
+```bash
+npm install
+npm run build
+heroku plugins:link .
+```
+
+Requires [Node.js](https://nodejs.org/) 20+ and the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli).
 
 ## Usage
 
+Commands are exposed under the `devcenter` topic, for example `heroku devcenter:open`.
+
 ### Open a published article
 
-    $ devcenter open error-pages
+```bash
+heroku devcenter:open error-pages
+```
+
+Use `--debug` for extra logging.
 
 ### Save a local copy of an article
 
-You can pull an article from its slug
+From a slug:
 
-    $ devcenter pull article-slug
+```bash
+heroku devcenter:pull article-slug
+```
 
-or from its URL:
+Or from a full article URL:
 
-    $ devcenter pull https://devcenter.heroku.com/articles/article-slug
+```bash
+heroku devcenter:pull https://devcenter.heroku.com/articles/article-slug
+```
 
-This will save an `article-slug.md` text file in your local directory. The file includes some metadata (article title and id) followed by the article content in markdown format. You can edit both the title and the content, but **never overwrite the article id**.
+This writes `article-slug.md` in the current directory: YAML front matter (`title`, `id`) then a blank line, then markdown body. You may edit the title and content, but **do not change the article `id`**.
 
-### Preview a local copy of an article
+Use `--force` (`-f`) to overwrite an existing file without prompting.
 
-    $ devcenter preview dynos
+### Preview a local article
 
-This will open a preview in your default browser and get it refreshed when you save the file. You can specify `--port` and `--host` options to customize the preview web server.
+```bash
+heroku devcenter:preview dynos
+```
 
-### Update an article in Dev Center from a local file
+Starts a local server (default `127.0.0.1:3000`), opens your browser, and reloads when the `.md` file changes. Customize with `--host` and `--port`.
 
-    $ devcenter push dynos
+### Push changes to Dev Center
 
-This will save the title and content from your local article in Dev Center, using your Heroku credentials from `~/.netrc`, which you can set by doing `heroku auth:login`.
+```bash
+heroku devcenter:push dynos
+```
+
+Uses the article id in the local file to update Dev Center. Authentication uses the Heroku API token in `~/.netrc` (create it with `heroku login`). Encrypted `~/.netrc.gpg` is not supported.
 
 ### Help
 
-Get available commands
+```bash
+heroku devcenter --help
+heroku devcenter:pull --help
+```
 
-    $ devcenter help
+### Development / custom Dev Center URL
 
-Get help about a specific command
+Point the plugin at another Dev Center base URL (e.g. a local app):
 
-    $ devcenter help pull
+```bash
+export DEVCENTER_BASE_URL=http://localhost:3000
+```
 
-### Development
+### Tests
 
-If you have a Dev Center instance, you can point your CLI to it by setting the `DEVCENTER_BASE_URL` env. var (e.g: `export DEVCENTER_BASE_URL=http://localhost:3000`).
+```bash
+npm test
+```
+
+Automated runs set `DEVCENTER_CLI_TEST=1` so tests do not open a real browser.
+
+## Markdown rendering
+
+Preview and push use a markdown pipeline based on [markdown-it](https://github.com/markdown-it/markdown-it). Very complex Dev Center–specific markup may differ slightly from the legacy Ruby `devcenter-parser` gem; validate important changes on Dev Center after pushing.
 
 ## License
 
-See LICENSE.txt file.
-
-The `preview` command uses the [Font Awesome](http://fontawesome.io/) vector icons, which have their own [License](https://github.com/FortAwesome/Font-Awesome#license).
+See [LICENSE.txt](LICENSE.txt).

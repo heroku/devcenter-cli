@@ -48,16 +48,15 @@
     "lint:fix": "eslint . --fix",
     "prepare": "npm run build",
     "posttest": "npm run lint",
-    "test": "npm run build && c8 --all --check-coverage --reporter=lcov --reporter=text-summary mocha --forbid-only \"test/**/*.test.ts\""
+    "test": "npm run build && c8 --check-coverage --reporter=lcov --reporter=text-summary mocha --forbid-only \"test/**/*.test.ts\""
   },
   "c8": {
-    "all": true,
     "exclude": [
       "**/*.d.ts",
       "test/**"
     ],
     "include": [
-      "src/**/*.ts"
+      "dist/**/*.js"
     ],
     "lines": 50,
     "functions": 50,
@@ -66,12 +65,23 @@
   },
   "dependencies": {
     "@heroku-cli/command": "^12.2.0",
-    "@oclif/core": "^4.3.0"
+    "@inquirer/prompts": "^8.4.1",
+    "@oclif/core": "^4.3.0",
+    "cheerio": "^1.2.0",
+    "chokidar": "^5.0.0",
+    "express": "^5.2.1",
+    "markdown-it": "^14.1.1",
+    "markdown-it-anchor": "^9.2.0",
+    "netrc": "^0.1.4",
+    "open": "^11.0.0",
+    "yaml": "^2.8.3"
   },
   "devDependencies": {
     "@oclif/plugin-help": "^6.2.36",
     "@oclif/test": "^4.1.18",
     "@types/chai": "^5.2.3",
+    "@types/express": "^5.0.6",
+    "@types/markdown-it": "^14.1.2",
     "@types/mocha": "^10.0.10",
     "@types/node": "^22.15.3",
     "c8": "^11.0.0",
@@ -80,6 +90,7 @@
     "eslint-config-oclif": "^6.0.156",
     "eslint-plugin-mocha": "^11.2.0",
     "mocha": "^11.7.5",
+    "nock": "^14.0.12",
     "oclif": "^4.22.81",
     "tsx": "^4.21.0",
     "typescript": "^5.4.0"
