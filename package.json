@@ -1,0 +1,90 @@
+{
+  "name": "@heroku-cli/heroku-cli-plugin-devcenter",
+  "description": "Heroku CLI plugin to interact with Heroku Dev Center",
+  "version": "1.3.1",
+  "author": "Heroku",
+  "type": "module",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/heroku/devcenter-cli.git"
+  },
+  "bugs": "https://github.com/heroku/devcenter-cli/issues",
+  "homepage": "https://github.com/heroku/devcenter-cli",
+  "keywords": [
+    "heroku-plugin",
+    "oclif"
+  ],
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "oclif": {
+    "bin": "heroku",
+    "commands": "./dist/commands",
+    "devPlugins": [
+      "@oclif/plugin-help"
+    ],
+    "topics": {
+      "devcenter": {
+        "description": "interact with Heroku Dev Center"
+      }
+    }
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "npm run clean && tsc && oclif manifest && mv oclif.manifest.json ./dist/oclif.manifest.json",
+    "clean": "rm -rf dist",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prepare": "npm run build",
+    "posttest": "npm run lint",
+    "test": "npm run build && c8 --all --check-coverage --reporter=lcov --reporter=text-summary mocha --forbid-only \"test/**/*.test.ts\""
+  },
+  "c8": {
+    "all": true,
+    "exclude": [
+      "**/*.d.ts",
+      "test/**"
+    ],
+    "include": [
+      "src/**/*.ts"
+    ],
+    "lines": 50,
+    "functions": 50,
+    "branches": 40,
+    "statements": 50
+  },
+  "dependencies": {
+    "@heroku-cli/command": "^12.2.0",
+    "@oclif/core": "^4.3.0"
+  },
+  "devDependencies": {
+    "@oclif/plugin-help": "^6.2.36",
+    "@oclif/test": "^4.1.18",
+    "@types/chai": "^5.2.3",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.15.3",
+    "c8": "^11.0.0",
+    "chai": "^6.2.2",
+    "eslint": "^9.39.4",
+    "eslint-config-oclif": "^6.0.156",
+    "eslint-plugin-mocha": "^11.2.0",
+    "mocha": "^11.7.5",
+    "oclif": "^4.22.81",
+    "tsx": "^4.21.0",
+    "typescript": "^5.4.0"
+  },
+  "overrides": {
+    "serialize-javascript": "^7.0.3"
+  }
+}
