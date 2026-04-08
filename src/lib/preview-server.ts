@@ -1,27 +1,29 @@
 import type {Server} from 'node:http'
 
 import {watch} from 'chokidar'
-import express, {type Response} from 'express'
+import express, {type Express, type Response} from 'express'
 import {existsSync} from 'node:fs'
 import {resolve} from 'node:path'
-import {cwd} from 'node:process'
 import open from 'open'
 
 import {ArticleFile} from './article-file.js'
+import {getArticleWorkingDirectory} from './paths.js'
 import {renderNotFoundPage, renderPreviewPage} from './preview-templates.js'
 
 export type PreviewLogger = (message: string) => void
 
-export async function runPreview(options: {
-  host: string
-  log: PreviewLogger
-  mdPath: string
-  port: number
-  slug: string
-}): Promise<void> {
-  const {host, log, mdPath, port, slug} = options
-  const app = express()
+export type PreviewApp = {
+  app: Express
+  broadcastReload: () => void
+}
+
+/**
+ * Express app for local Dev Center preview (routes only; no listen).
+ * `broadcastReload` notifies active `/stream` SSE connections (same as file save in `runPreview`).
+ */
+export function createPreviewApp(log: PreviewLogger): PreviewApp {
   const clients = new Set<Response>()
+  const app = express()
 
   app.get('/favicon.ico', (_req, res) => {
     res.status(204).end()
@@ -45,7 +47,7 @@ export async function runPreview(options: {
   app.get('/:articleSlug', (req, res) => {
     const {articleSlug} = req.params
     log(`Local article requested: ${articleSlug}`)
-    const srcPath = resolve(cwd(), `${articleSlug}.md`)
+    const srcPath = resolve(getArticleWorkingDirectory(), `${articleSlug}.md`)
     if (!existsSync(srcPath)) {
       const ref = typeof req.get('Referer') === 'string' ? req.get('Referer') : undefined
       res.status(404).type('html').send(renderNotFoundPage(ref))
@@ -59,6 +61,29 @@ export async function runPreview(options: {
     res.type('html').send(html)
   })
 
+  const broadcastReload = () => {
+    for (const clientRes of clients) {
+      try {
+        clientRes.write('data: reload\n\n')
+      } catch {
+        clients.delete(clientRes)
+      }
+    }
+  }
+
+  return {app, broadcastReload}
+}
+
+export async function runPreview(options: {
+  host: string
+  log: PreviewLogger
+  mdPath: string
+  port: number
+  slug: string
+}): Promise<void> {
+  const {host, log, mdPath, port, slug} = options
+  const {app, broadcastReload} = createPreviewApp(log)
+
   const server: Server = await new Promise(resolveListen => {
     const s = app.listen(port, host, () => {
       resolveListen(s)
@@ -67,13 +92,7 @@ export async function runPreview(options: {
 
   const watcher = watch(mdPath, {ignoreInitial: true}).on('change', () => {
     log(`File modified: ${mdPath}`)
-    for (const clientRes of clients) {
-      try {
-        clientRes.write('data: reload\n\n')
-      } catch {
-        clients.delete(clientRes)
-      }
-    }
+    broadcastReload()
   })
 
   const url = `http://${host}:${port}/${slug}`

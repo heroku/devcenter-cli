@@ -1,6 +1,6 @@
 import {expect} from 'chai'
 
-import {name} from '../../dist/index.js'
+import {name} from '../../src/index.js'
 
 describe('package entry', function () {
   it('exports the npm package name', function () {

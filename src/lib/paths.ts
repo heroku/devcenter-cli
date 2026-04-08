@@ -40,6 +40,14 @@ export function slugFromArticleUrl(url: string): string {
   return tail.split('?')[0]!.split('#')[0]!
 }
 
+/**
+ * Directory used for local `*.md` article files (`pull`, `push`, `preview`).
+ * Tests may set `DEVCENTER_CLI_CWD` so commands can run without changing `process.cwd()` away from the plugin root (required for oclif).
+ */
+export function getArticleWorkingDirectory(): string {
+  return process.env.DEVCENTER_CLI_CWD ?? process.cwd()
+}
+
 export function mdFilePath(slug: string): string {
-  return resolve(process.cwd(), `${slug}.md`)
+  return resolve(getArticleWorkingDirectory(), `${slug}.md`)
 }

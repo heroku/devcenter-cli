@@ -4,10 +4,27 @@ import {
   articleApiPath,
   articlePath,
   articleUrlMatches,
+  getArticleWorkingDirectory,
+  getDevcenterBaseUrl,
   slugFromArticleUrl,
-} from '../../dist/lib/paths.js'
+} from '../../src/lib/paths.js'
 
 describe('paths', function () {
+  afterEach(function () {
+    delete process.env.DEVCENTER_CLI_CWD
+    delete process.env.DEVCENTER_BASE_URL
+  })
+
+  it('getDevcenterBaseUrl respects DEVCENTER_BASE_URL', function () {
+    process.env.DEVCENTER_BASE_URL = 'https://example.test'
+    expect(getDevcenterBaseUrl()).to.equal('https://example.test')
+  })
+
+  it('getArticleWorkingDirectory uses DEVCENTER_CLI_CWD when set', function () {
+    process.env.DEVCENTER_CLI_CWD = '/tmp/example-articles'
+    expect(getArticleWorkingDirectory()).to.equal('/tmp/example-articles')
+  })
+
   it('articlePath builds /articles/:slug', function () {
     expect(articlePath('ps')).to.equal('/articles/ps')
   })

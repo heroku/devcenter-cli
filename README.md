@@ -89,6 +89,8 @@ npm test
 
 Automated runs set `DEVCENTER_CLI_TEST=1` so tests do not open a real browser.
 
+Integration tests set `DEVCENTER_CLI_CWD` to a temp directory so article files are isolated without changing the process working directory away from the plugin root (required for oclif to load `package.json`). This variable is only for tests; normal usage relies on the current working directory.
+
 ## Markdown rendering
 
 Preview and push use a markdown pipeline based on [markdown-it](https://github.com/markdown-it/markdown-it). Very complex Dev Center–specific markup may differ slightly from the legacy Ruby `devcenter-parser` gem; validate important changes on Dev Center after pushing.

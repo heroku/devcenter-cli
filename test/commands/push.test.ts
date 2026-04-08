@@ -1,0 +1,250 @@
+import {expect} from 'chai'
+import nock from 'nock'
+import {mkdtempSync, rmSync, writeFileSync} from 'node:fs'
+import {tmpdir} from 'node:os'
+import {join} from 'node:path'
+
+import Push from '../../src/commands/devcenter/push.js'
+import {runCommand} from '../helpers/run-command.js'
+
+describe('devcenter:push', function () {
+  let workDir: string
+  let previousHome: string | undefined
+  let previousArticleCwd: string | undefined
+  let netrcHome: string
+
+  beforeEach(function () {
+    previousHome = process.env.HOME
+    previousArticleCwd = process.env.DEVCENTER_CLI_CWD
+    workDir = mkdtempSync(join(tmpdir(), 'devcenter-push-'))
+    netrcHome = mkdtempSync(join(tmpdir(), 'devcenter-netrc-'))
+    process.env.HOME = netrcHome
+    process.env.DEVCENTER_CLI_CWD = workDir
+    writeFileSync(
+      join(netrcHome, '.netrc'),
+      `machine api.heroku.com
+login test@heroku.com
+password fake-api-token-for-tests
+`,
+      'utf8',
+    )
+  })
+
+  afterEach(function () {
+    nock.cleanAll()
+    if (previousHome === undefined) {
+      delete process.env.HOME
+    } else {
+      process.env.HOME = previousHome
+    }
+
+    if (previousArticleCwd === undefined) {
+      delete process.env.DEVCENTER_CLI_CWD
+    } else {
+      process.env.DEVCENTER_CLI_CWD = previousArticleCwd
+    }
+
+    rmSync(workDir, {recursive: true})
+    rmSync(netrcHome, {recursive: true})
+  })
+
+  it('pushes article content through validate and update APIs', async function () {
+    writeFileSync(
+      join(workDir, 'acme.md'),
+      `title: Acme Co
+id: 7
+
+Hello **world**.
+`,
+      'utf8',
+    )
+
+    nock('https://devcenter.heroku.com')
+    .post('/api/v1/private/broken-link-checks.json')
+    .reply(200, [])
+    .post('/api/v1/private/articles/7/validate.json')
+    .reply(200, {})
+    .put('/api/v1/private/articles/7.json')
+    .reply(200, {
+      status: 'published',
+      title: 'Acme Co',
+      url: 'https://devcenter.heroku.com/articles/acme',
+    })
+
+    const {error} = await runCommand(Push, ['acme'])
+    expect(error).to.equal(undefined)
+  })
+
+  it('logs broken links when the API returns some', async function () {
+    writeFileSync(
+      join(workDir, 'brk.md'),
+      `title: B
+id: 8
+
+[link](http://broken)
+`,
+      'utf8',
+    )
+
+    nock('https://devcenter.heroku.com')
+    .post('/api/v1/private/broken-link-checks.json')
+    .reply(200, [{text: 'link', url: 'http://broken'}])
+    .post('/api/v1/private/articles/8/validate.json')
+    .reply(200, {})
+    .put('/api/v1/private/articles/8.json')
+    .reply(200, {status: 'draft', title: 'B', url: 'https://devcenter.heroku.com/articles/brk'})
+
+    const {error, stdout} = await runCommand(Push, ['brk'])
+    expect(error).to.equal(undefined)
+    expect(stdout).to.contain('broken link')
+  })
+
+  it('fails when validation returns errors', async function () {
+    writeFileSync(join(workDir, 'bad.md'), 'title: X\nid: 11\n\nbody\n', 'utf8')
+    nock('https://devcenter.heroku.com')
+    .post('/api/v1/private/broken-link-checks.json')
+    .reply(200, [])
+    .post('/api/v1/private/articles/11/validate.json')
+    .reply(200, {title: ['is invalid']})
+
+    const {error} = await runCommand(Push, ['bad'])
+    expect(error?.message).to.contain("can't be saved")
+  })
+
+  it('fails when update returns an error', async function () {
+    writeFileSync(join(workDir, 'up.md'), 'title: U\nid: 12\n\nbody\n', 'utf8')
+    nock('https://devcenter.heroku.com')
+    .post('/api/v1/private/broken-link-checks.json')
+    .reply(200, [])
+    .post('/api/v1/private/articles/12/validate.json')
+    .reply(200, {})
+    .put('/api/v1/private/articles/12.json')
+    .reply(422, {error: 'rejected'})
+
+    const {error} = await runCommand(Push, ['up'])
+    expect(error?.message).to.contain('rejected')
+  })
+
+  it('errors when slug is empty after trimming', async function () {
+    const {error} = await runCommand(Push, ['   '])
+    expect(error?.message).to.contain('Please provide an article slug')
+  })
+
+  it('errors when the markdown file is missing', async function () {
+    const {error} = await runCommand(Push, ['missing'])
+    expect(error?.message).to.contain("Can't find")
+    expect(error?.message).to.contain('missing.md')
+  })
+
+  it('errors when netrc token cannot be read', async function () {
+    writeFileSync(join(workDir, 'tok.md'), 'title: T\nid: 1\n\nx\n', 'utf8')
+    const prevHome = process.env.HOME
+    const emptyHome = mkdtempSync(join(tmpdir(), 'devcenter-no-netrc-'))
+    process.env.HOME = emptyHome
+    try {
+      const {error} = await runCommand(Push, ['tok'])
+      expect(error?.message).to.contain('Heroku credentials')
+    } finally {
+      process.env.HOME = prevHome
+      rmSync(emptyHome, {recursive: true})
+    }
+  })
+
+  it('fails when validation returns a non-empty array body', async function () {
+    writeFileSync(join(workDir, 'arr.md'), 'title: A\nid: 20\n\nb\n', 'utf8')
+    nock('https://devcenter.heroku.com')
+    .post('/api/v1/private/broken-link-checks.json')
+    .reply(200, [])
+    .post('/api/v1/private/articles/20/validate.json')
+    .reply(200, [{code: 'invalid'}])
+
+    const {error} = await runCommand(Push, ['arr'])
+    expect(error?.message).to.contain("can't be saved")
+  })
+
+  it('uses HTTP status when update error body has no error field', async function () {
+    writeFileSync(join(workDir, 'nostr.md'), 'title: N\nid: 21\n\nb\n', 'utf8')
+    nock('https://devcenter.heroku.com')
+    .post('/api/v1/private/broken-link-checks.json')
+    .reply(200, [])
+    .post('/api/v1/private/articles/21/validate.json')
+    .reply(200, {})
+    .put('/api/v1/private/articles/21.json')
+    .reply(418, {})
+
+    const {error} = await runCommand(Push, ['nostr'])
+    expect(error?.message).to.contain('418')
+  })
+
+  it('logs archived status when API returns it', async function () {
+    writeFileSync(join(workDir, 'arc.md'), 'title: Arc\nid: 22\n\nb\n', 'utf8')
+    nock('https://devcenter.heroku.com')
+    .post('/api/v1/private/broken-link-checks.json')
+    .reply(200, [])
+    .post('/api/v1/private/articles/22/validate.json')
+    .reply(200, {})
+    .put('/api/v1/private/articles/22.json')
+    .reply(200, {
+      status: 'archived',
+      title: 'Arc',
+      url: 'https://devcenter.heroku.com/articles/arc',
+    })
+
+    const {error, stdout} = await runCommand(Push, ['arc'])
+    expect(error).to.equal(undefined)
+    expect(stdout).to.contain('archived')
+  })
+
+  it('logs published_quietly status when API returns it', async function () {
+    writeFileSync(join(workDir, 'pq.md'), 'title: Pq\nid: 23\n\nb\n', 'utf8')
+    nock('https://devcenter.heroku.com')
+    .post('/api/v1/private/broken-link-checks.json')
+    .reply(200, [])
+    .post('/api/v1/private/articles/23/validate.json')
+    .reply(200, {})
+    .put('/api/v1/private/articles/23.json')
+    .reply(200, {
+      status: 'published_quietly',
+      title: 'Pq',
+      url: 'https://devcenter.heroku.com/articles/pq',
+    })
+
+    const {error, stdout} = await runCommand(Push, ['pq'])
+    expect(error).to.equal(undefined)
+    expect(stdout).to.contain('published quietly')
+  })
+
+  it('logs staging status when API returns it', async function () {
+    writeFileSync(join(workDir, 'st.md'), 'title: St\nid: 24\n\nb\n', 'utf8')
+    nock('https://devcenter.heroku.com')
+    .post('/api/v1/private/broken-link-checks.json')
+    .reply(200, [])
+    .post('/api/v1/private/articles/24/validate.json')
+    .reply(200, {})
+    .put('/api/v1/private/articles/24.json')
+    .reply(200, {
+      status: 'staging',
+      title: 'St',
+      url: 'https://devcenter.heroku.com/articles/st',
+    })
+
+    const {error, stdout} = await runCommand(Push, ['st'])
+    expect(error).to.equal(undefined)
+    expect(stdout).to.contain('staging mode')
+  })
+
+  it('logs generic completion when update body omits status', async function () {
+    writeFileSync(join(workDir, 'min.md'), 'title: M\nid: 13\n\nbody\n', 'utf8')
+    nock('https://devcenter.heroku.com')
+    .post('/api/v1/private/broken-link-checks.json')
+    .reply(200, [])
+    .post('/api/v1/private/articles/13/validate.json')
+    .reply(200, {})
+    .put('/api/v1/private/articles/13.json')
+    .reply(200, {})
+
+    const {error, stdout} = await runCommand(Push, ['min'])
+    expect(error).to.equal(undefined)
+    expect(stdout).to.contain('Article update completed')
+  })
+})

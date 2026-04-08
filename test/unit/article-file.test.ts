@@ -3,7 +3,7 @@ import {mkdtempSync, rmSync, writeFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 
-import {ArticleFile} from '../../dist/lib/article-file.js'
+import {ArticleFile} from '../../src/lib/article-file.js'
 
 describe('ArticleFile', function () {
   it('reads YAML front matter and markdown body', function () {
@@ -44,6 +44,17 @@ Hello **world**
       )
       const a = ArticleFile.read(p)
       expect(a.html).to.contain('strong')
+    } finally {
+      rmSync(dir, {recursive: true})
+    }
+  })
+
+  it('read throws when the file has no YAML/content separator', function () {
+    const dir = mkdtempSync(join(tmpdir(), 'devcenter-article-'))
+    try {
+      const p = join(dir, 'bad.md')
+      writeFileSync(p, 'not valid article format', 'utf8')
+      expect(() => ArticleFile.read(p)).to.throw(/Invalid article file/)
     } finally {
       rmSync(dir, {recursive: true})
     }
