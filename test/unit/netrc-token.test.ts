@@ -4,24 +4,22 @@ import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 
 import {getHerokuNetrcToken} from '../../src/lib/netrc-token.js'
+import {
+  applyHomeEnv, type HomeEnvSnapshot, setHomeDirForTests, snapshotHomeEnv,
+} from '../helpers/test-home-env.js'
 
 describe('getHerokuNetrcToken', function () {
-  let previousHome: string | undefined
+  let homeEnv: HomeEnvSnapshot
   let fakeHome: string
 
   beforeEach(function () {
-    previousHome = process.env.HOME
+    homeEnv = snapshotHomeEnv()
     fakeHome = mkdtempSync(join(tmpdir(), 'netrc-test-'))
-    process.env.HOME = fakeHome
+    setHomeDirForTests(fakeHome)
   })
 
   afterEach(function () {
-    if (previousHome === undefined) {
-      delete process.env.HOME
-    } else {
-      process.env.HOME = previousHome
-    }
-
+    applyHomeEnv(homeEnv)
     rmSync(fakeHome, {recursive: true})
   })
 

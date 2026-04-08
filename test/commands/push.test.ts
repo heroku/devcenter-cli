@@ -6,19 +6,22 @@ import {join} from 'node:path'
 
 import Push from '../../src/commands/devcenter/push.js'
 import {runCommand} from '../helpers/run-command.js'
+import {
+  applyHomeEnv, type HomeEnvSnapshot, setHomeDirForTests, snapshotHomeEnv,
+} from '../helpers/test-home-env.js'
 
 describe('devcenter:push', function () {
   let workDir: string
-  let previousHome: string | undefined
+  let homeEnv: HomeEnvSnapshot
   let previousArticleCwd: string | undefined
   let netrcHome: string
 
   beforeEach(function () {
-    previousHome = process.env.HOME
+    homeEnv = snapshotHomeEnv()
     previousArticleCwd = process.env.DEVCENTER_CLI_CWD
     workDir = mkdtempSync(join(tmpdir(), 'devcenter-push-'))
     netrcHome = mkdtempSync(join(tmpdir(), 'devcenter-netrc-'))
-    process.env.HOME = netrcHome
+    setHomeDirForTests(netrcHome)
     process.env.DEVCENTER_CLI_CWD = workDir
     writeFileSync(
       join(netrcHome, '.netrc'),
@@ -32,11 +35,7 @@ password fake-api-token-for-tests
 
   afterEach(function () {
     nock.cleanAll()
-    if (previousHome === undefined) {
-      delete process.env.HOME
-    } else {
-      process.env.HOME = previousHome
-    }
+    applyHomeEnv(homeEnv)
 
     if (previousArticleCwd === undefined) {
       delete process.env.DEVCENTER_CLI_CWD
@@ -138,14 +137,14 @@ id: 8
 
   it('errors when netrc token cannot be read', async function () {
     writeFileSync(join(workDir, 'tok.md'), 'title: T\nid: 1\n\nx\n', 'utf8')
-    const prevHome = process.env.HOME
+    const noNetrcHome = snapshotHomeEnv()
     const emptyHome = mkdtempSync(join(tmpdir(), 'devcenter-no-netrc-'))
-    process.env.HOME = emptyHome
+    setHomeDirForTests(emptyHome)
     try {
       const {error} = await runCommand(Push, ['tok'])
       expect(error?.message).to.contain('Heroku credentials')
     } finally {
-      process.env.HOME = prevHome
+      applyHomeEnv(noNetrcHome)
       rmSync(emptyHome, {recursive: true})
     }
   })
