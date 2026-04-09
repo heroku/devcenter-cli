@@ -5,7 +5,7 @@ import {stringify as stringifyYaml} from 'yaml'
 
 import {ArticleFile} from '../../lib/article-file.js'
 import {DevcenterClient} from '../../lib/devcenter-client.js'
-import {getHerokuNetrcToken} from '../../lib/netrc-token.js'
+import {getHerokuApiToken} from '../../lib/heroku-api-auth.js'
 import {mdFilePath} from '../../lib/paths.js'
 
 function hasValidationErrors(body: unknown): boolean {
@@ -59,7 +59,7 @@ export default class Push extends Command {
 
     let token: string
     try {
-      token = getHerokuNetrcToken()
+      token = getHerokuApiToken()
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
       this.error(message, {exit: 1})

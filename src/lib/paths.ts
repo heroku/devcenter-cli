@@ -24,6 +24,11 @@ export function updateArticlePath(id: number | string): string {
   return `/api/v1/private/articles/${id}.json`
 }
 
+/** Private CMS show by numeric id or slug (same path segment as `update`). */
+export function privateArticleShowPath(slugOrId: string): string {
+  return `/api/v1/private/articles/${encodeURIComponent(slugOrId)}.json`
+}
+
 export function brokenLinkChecksPath(): string {
   return '/api/v1/private/broken-link-checks.json'
 }

@@ -48,6 +48,8 @@ heroku devcenter:pull https://devcenter.heroku.com/articles/article-slug
 
 This writes `article-slug.md` in the current directory: YAML front matter (`title`, `id`) then a blank line, then markdown body. You may edit the title and content, but **do not change the article `id`**.
 
+`pull` first requests the public `/articles/<slug>.json` endpoint. If that fails and you have a plain **`~/.netrc`** from **`heroku login`**, it **retries the same URL with Heroku API credentials**, then **`GET /api/v1/private/articles/<slug>.json`** (the same private API as `push`) so drafts and other non-public articles can load when your Dev Center account is authorized. Run **`heroku devcenter:pull <slug> --debug`** to print status and full JSON bodies for each attempt.
+
 Use `--force` (`-f`) to overwrite an existing file without prompting.
 
 ### Preview a local article

@@ -27,6 +27,21 @@ describe('DevcenterClient', function () {
     expect(res.notFound).to.equal(true)
   })
 
+  it('getJson sends Authorization when token is passed', async function () {
+    nock('https://devcenter.heroku.com', {
+      reqheaders: {authorization: `Basic ${Buffer.from('secret').toString('base64')}`},
+    })
+    .get('/articles/z.json')
+    .reply(200, {
+      content: 'x', id: 1, slug: 'z', title: 'Z',
+    })
+
+    const client = new DevcenterClient()
+    const res = await client.getJson('/articles/z.json', undefined, {token: 'secret'})
+    expect(res.ok).to.equal(true)
+    expect((res.body as {slug?: string}).slug).to.equal('z')
+  })
+
   it('getJson parses query params and tolerates invalid JSON body', async function () {
     nock('https://devcenter.heroku.com')
     .get('/articles/x.json')

@@ -2,6 +2,7 @@ import * as http from 'node:http'
 import * as https from 'node:https'
 import {URL} from 'node:url'
 
+import {basicAuthHeaders} from './heroku-api-auth.js'
 import {
   brokenLinkChecksPath,
   getDevcenterBaseUrl,
@@ -65,13 +66,12 @@ export class DevcenterClient {
     token: string,
     params: Record<string, string>,
   ): Promise<{body: unknown; ok: boolean; status: number;}> {
-    const auth = Buffer.from(token).toString('base64')
     const body = new URLSearchParams(params).toString()
     const res = await nodeRequest(method, this.url(path), {
       body,
       headers: {
         ...DEFAULT_HEADERS,
-        Authorization: `Basic ${auth}`,
+        ...basicAuthHeaders(token),
         'Content-Length': String(Buffer.byteLength(body)),
         'Content-Type': 'application/x-www-form-urlencoded',
       },
@@ -92,7 +92,11 @@ export class DevcenterClient {
     return this.authForm('POST', brokenLinkChecksPath(), token, {content})
   }
 
-  async getJson<T>(path: string, query?: Record<string, string>): Promise<{body: T; ok: boolean; status: number;}> {
+  async getJson<T>(
+    path: string,
+    query?: Record<string, string>,
+    options?: {token?: string},
+  ): Promise<{body: T; ok: boolean; status: number;}> {
     const u = new URL(this.url(path))
     if (query) {
       for (const [k, v] of Object.entries(query)) {
@@ -100,7 +104,12 @@ export class DevcenterClient {
       }
     }
 
-    const res = await nodeRequest('GET', u.toString(), {headers: {...DEFAULT_HEADERS}})
+    const headers: Record<string, string> = {...DEFAULT_HEADERS}
+    if (options?.token) {
+      Object.assign(headers, basicAuthHeaders(options.token))
+    }
+
+    const res = await nodeRequest('GET', u.toString(), {headers})
     let parsed: T
     try {
       parsed = JSON.parse(res.body || '{}') as T

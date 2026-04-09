@@ -4,10 +4,10 @@ import {homedir} from 'node:os'
 import {join} from 'node:path'
 
 /**
- * Returns the Heroku API token from ~/.netrc (same source as the legacy Ruby CLI).
- * Encrypted ~/.netrc.gpg is not supported; use a plain netrc or `heroku login`.
+ * Heroku API token from `~/.netrc` (`api.heroku.com`), same source as `heroku login`.
+ * Encrypted `~/.netrc.gpg` is not supported.
  */
-export function getHerokuNetrcToken(): string {
+export function getHerokuApiToken(): string {
   const home = homedir()
   const gpgPath = join(home, '.netrc.gpg')
   const plainPath = join(home, '.netrc')
@@ -27,4 +27,14 @@ export function getHerokuNetrcToken(): string {
   }
 
   return token
+}
+
+/** `Authorization` header value Dev Center private APIs expect (matches legacy CLI behavior). */
+export function basicAuthHeaderValue(token: string): string {
+  const encoded = Buffer.from(token).toString('base64')
+  return `Basic ${encoded}`
+}
+
+export function basicAuthHeaders(token: string): Record<string, string> {
+  return {Authorization: basicAuthHeaderValue(token)}
 }
