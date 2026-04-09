@@ -46,9 +46,23 @@ Get help about a specific command
 
     $ devcenter help pull
 
+### Heroku CLI plugin (optional)
+
+With Node 22+ and the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli), you can link this repo and use **`heroku devcenter:open`** and **`heroku devcenter:preview`** (same behavior as `devcenter open` / `devcenter preview` above). Install from a clone:
+
+```bash
+npm install
+npm run build
+heroku plugins:link .
+```
+
+`pull` and `push` remain on the Ruby gem until a later release.
+
 ### Development
 
 If you have a Dev Center instance, you can point your CLI to it by setting the `DEVCENTER_BASE_URL` env. var (e.g: `export DEVCENTER_BASE_URL=http://localhost:3000`).
+
+TypeScript code lives under `src/` with tests under `test/`. With Node 22+, run `npm install` and `npm test`. Command tests set `DEVCENTER_CLI_TEST=1` (and `DEVCENTER_CLI_CWD` where needed) so the browser is not opened during runs.
 
 ## License
 
