@@ -72,7 +72,7 @@ Commands mirror the gem: **`heroku devcenter:open`**, **`pull`**, **`preview`**,
 
 If you have a Dev Center instance, you can point the CLI at it with **`DEVCENTER_BASE_URL`** (e.g. `export DEVCENTER_BASE_URL=http://localhost:3000`).
 
-TypeScript lives under `src/` with tests under `test/`. With Node 22+, run **`npm install`** and **`npm test`** (runs **c8** coverage gates on `src/**/*.ts`, then lint). Command tests set **`DEVCENTER_CLI_TEST=1`**, **`DEVCENTER_CLI_CWD`** where needed, and **`DEVCENTER_CLI_TEST_CONFIRM`** for pull overwrite prompts so runs stay non-interactive.
+TypeScript lives under `src/` with tests under `test/`. With Node 22+, run **`npm install`** and **`npm test`** (then ESLint). Command tests set **`DEVCENTER_CLI_TEST=1`**, **`DEVCENTER_CLI_CWD`** where needed, and **`DEVCENTER_CLI_TEST_CONFIRM`** for pull overwrite prompts so runs stay non-interactive.
 
 ## License
 
