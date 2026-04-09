@@ -96,7 +96,7 @@ function withCapturedOutput<T>(
   })
 }
 
-/** Run an oclif command class from `src/` (via tsx in tests). */
+/** Run an oclif command class from `src/` (via tsx) so c8 attributes coverage to TypeScript sources. */
 export async function runCommand<T = unknown>(
   CommandClass: GenericCmd,
   args: string | string[] = [],

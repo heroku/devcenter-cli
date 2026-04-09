@@ -49,7 +49,7 @@
     "prepare": "npm run build",
     "posttest": "npm run lint",
     "pretest": "npm run build",
-    "test": "mocha --forbid-only \"test/**/*.test.ts\""
+    "test": "c8 --all --check-coverage --reporter=lcov --reporter=text-summary mocha --forbid-only \"test/**/*.test.ts\""
   },
   "dependencies": {
     "@heroku-cli/command": "^12.2.0",
@@ -73,6 +73,7 @@
     "@types/node": "^22.15.3",
     "@types/supertest": "^7.2.0",
     "ansis": "^3.17.0",
+    "c8": "^11.0.0",
     "chai": "^6.2.2",
     "eslint": "^9.39.4",
     "eslint-config-oclif": "^6.0.156",

@@ -1,60 +1,16 @@
 # Dev Center CLI
 
-CLI to interact with Heroku's Dev Center
+Heroku CLI plugin to work with [Heroku Dev Center](https://devcenter.heroku.com) articles from your machine.
 
 ## Installation
 
-    $ gem install devcenter
-
-## Usage
-
-### Open a published article
-
-    $ devcenter open error-pages
-
-### Save a local copy of an article
-
-You can pull an article from its slug
-
-    $ devcenter pull article-slug
-
-or from its URL:
-
-    $ devcenter pull https://devcenter.heroku.com/articles/article-slug
-
-This will save an `article-slug.md` text file in your local directory. The file includes some metadata (article title and id) followed by the article content in markdown format. You can edit both the title and the content, but **never overwrite the article id**.
-
-### Preview a local copy of an article
-
-    $ devcenter preview dynos
-
-This will open a preview in your default browser and get it refreshed when you save the file. You can specify `--port` and `--host` options to customize the preview web server.
-
-### Update an article in Dev Center from a local file
-
-    $ devcenter push dynos
-
-This will save the title and content from your local article in Dev Center, using your Heroku credentials from `~/.netrc`, which you can set by doing `heroku auth:login`.
-
-### Help
-
-Get available commands
-
-    $ devcenter help
-
-Get help about a specific command
-
-    $ devcenter help pull
-
-### Heroku CLI plugin (optional)
-
-With Node 22+ and the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli), install the plugin and use the `devcenter` topic (same capabilities as the gem commands above):
+Install as a Heroku CLI plugin:
 
 ```bash
 heroku plugins:install @heroku-cli/heroku-cli-plugin-devcenter
 ```
 
-For local development from this repository:
+For local development, from this repository:
 
 ```bash
 npm install
@@ -62,20 +18,83 @@ npm run build
 heroku plugins:link .
 ```
 
-Commands mirror the gem: **`heroku devcenter:open`**, **`pull`**, **`preview`**, and **`push`** (e.g. `heroku devcenter:pull article-slug`, `heroku devcenter:push dynos`).
+Requires [Node.js](https://nodejs.org/) 22+ and the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli).
 
-**Pull:** tries public `/articles/<slug>.json`, then the same URL with `~/.netrc` Heroku credentials, then **`GET /api/v1/private/articles/<slug>.json`** so drafts can load when your account is authorized. Use **`--debug`** to log each attempt. **`--force`** (`-f`) overwrites an existing file without prompting. Encrypted `~/.netrc.gpg` is not supported.
+## Usage
 
-**Push:** uses the article id in your local `.md` file and Heroku API credentials in plain **`~/.netrc`** from **`heroku login`**.
+Commands are exposed under the `devcenter` topic, for example `heroku devcenter:open`.
 
-### Development
+### Open a published article
 
-If you have a Dev Center instance, you can point the CLI at it with **`DEVCENTER_BASE_URL`** (e.g. `export DEVCENTER_BASE_URL=http://localhost:3000`).
+```bash
+heroku devcenter:open error-pages
+```
 
-TypeScript lives under `src/` with tests under `test/`. With Node 22+, run **`npm install`** and **`npm test`** (then ESLint). Command tests set **`DEVCENTER_CLI_TEST=1`**, **`DEVCENTER_CLI_CWD`** where needed, and **`DEVCENTER_CLI_TEST_CONFIRM`** for pull overwrite prompts so runs stay non-interactive.
+Use `--debug` for extra logging.
+
+### Save a local copy of an article
+
+From a slug:
+
+```bash
+heroku devcenter:pull article-slug
+```
+
+Or from a full article URL:
+
+```bash
+heroku devcenter:pull https://devcenter.heroku.com/articles/article-slug
+```
+
+This writes `article-slug.md` in the current directory: YAML front matter (`title`, `id`) then a blank line, then markdown body. You may edit the title and content, but **do not change the article `id`**.
+
+`pull` first requests the public `/articles/<slug>.json` endpoint. If that fails and you have a plain **`~/.netrc`** from **`heroku login`**, it **retries the same URL with Heroku API credentials**, then **`GET /api/v1/private/articles/<slug>.json`** (the same private API as `push`) so drafts and other non-public articles can load when your Dev Center account is authorized. Run **`heroku devcenter:pull <slug> --debug`** to print status and full JSON bodies for each attempt.
+
+Use `--force` (`-f`) to overwrite an existing file without prompting.
+
+### Preview a local copy of an article
+
+```bash
+heroku devcenter:preview dynos
+```
+
+Starts a local server (default `127.0.0.1:3000`), opens your browser, and reloads when the `.md` file changes. Customize with `--host` and `--port`.
+
+### Push changes to Dev Center
+
+```bash
+heroku devcenter:push dynos
+```
+
+Uses the article id in the local file to update Dev Center. Authentication uses the Heroku API token in `~/.netrc` (create it with `heroku login`). Encrypted `~/.netrc.gpg` is not supported.
+
+### Help
+
+```bash
+heroku devcenter --help
+heroku devcenter:pull --help
+```
+
+### Development / custom Dev Center URL
+
+Point the plugin at another Dev Center base URL (e.g. a local app):
+
+```bash
+export DEVCENTER_BASE_URL=http://localhost:3000
+```
+
+### Tests
+
+```bash
+npm test
+```
+
+Runs **c8** coverage checks on `src/**/*.ts` (80% thresholds), then **ESLint**. Command tests set `DEVCENTER_CLI_TEST=1` so the browser is not opened.
+
+Integration tests set `DEVCENTER_CLI_CWD` to a temp directory so article files are isolated without changing the process working directory away from the plugin root (required for oclif to load `package.json`). This variable is only for tests; normal usage relies on the current working directory.
 
 ## License
 
-See LICENSE.txt file.
+See [LICENSE.txt](LICENSE.txt).
 
 The `preview` command uses the [Font Awesome](http://fontawesome.io/) vector icons, which have their own [License](https://github.com/FortAwesome/Font-Awesome#license).

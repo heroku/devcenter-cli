@@ -12,4 +12,4 @@ We welcome contributions!
 * Check for unnecessary whitespace with `git --diff` before commiting.
 * Push your changes to a topic branch in the GitHub repository.
 * Submit a pull request to the base branch.
-* If you change TypeScript under `src/` or `test/`, run `npm install` and `npm test` (Node 22+).
+* If you change TypeScript under `src/` or `test/`, run `npm install` and `npm test` (Node 22+); that enforces coverage on `src/**/*.ts` and runs ESLint.
