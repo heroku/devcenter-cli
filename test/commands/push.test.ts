@@ -26,8 +26,8 @@ describe('devcenter:push', function () {
     writeFileSync(
       join(netrcHome, '.netrc'),
       `machine api.heroku.com
-login test@heroku.com
-password fake-api-token-for-tests
+  login test@heroku.com
+  password fake-api-token-for-tests
 `,
       'utf8',
     )

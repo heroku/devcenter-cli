@@ -18,7 +18,7 @@ npm run build
 heroku plugins:link .
 ```
 
-Requires [Node.js](https://nodejs.org/) 22+ and the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli).
+Requires [Node.js](https://nodejs.org/) 22+ and the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli). Authentication uses the same netrc as the CLI: plain `~/.netrc` or encrypted `~/.netrc.gpg` (decrypted with `gpg` when applicable), after `heroku login`.
 
 ## Issues
 
@@ -59,7 +59,7 @@ heroku devcenter:pull https://devcenter.heroku.com/articles/article-slug
 
 This writes `article-slug.md` in the current directory: YAML front matter (`title`, `id`) then a blank line, then markdown body. You may edit the title and content, but **do not change the article `id`**.
 
-`pull` first requests the public `/articles/<slug>.json` endpoint. If that fails and you have a plain **`~/.netrc`** from **`heroku login`**, it **retries the same URL with Heroku API credentials**, then **`GET /api/v1/private/articles/<slug>.json`** (the same private API as `push`) so drafts and other non-public articles can load when your Dev Center account is authorized. Run **`heroku devcenter:pull <slug> --debug`** to print status and full JSON bodies for each attempt.
+`pull` first requests the public `/articles/<slug>.json` endpoint. If that fails and you have **`~/.netrc`** or **`~/.netrc.gpg`** credentials from **`heroku login`**, it **retries the same URL with Heroku API credentials**, then **`GET /api/v1/private/articles/<slug>.json`** (the same private API as `push`) so drafts and other non-public articles can load when your Dev Center account is authorized. Run **`heroku devcenter:pull <slug> --debug`** to print status and full JSON bodies for each attempt.
 
 Use `--force` (`-f`) to overwrite an existing file without prompting.
 
@@ -77,7 +77,7 @@ Starts a local server (default `127.0.0.1:3000`), opens your browser, and reload
 heroku devcenter:push dynos
 ```
 
-Uses the article id in the local file to update Dev Center. Authentication uses the Heroku API token in `~/.netrc` (create it with `heroku login`). Encrypted `~/.netrc.gpg` is not supported.
+Uses the article id in the local file to update Dev Center. Authentication uses the Heroku API token from netrc (`api.heroku.com`), same resolution as the Heroku CLI (`heroku login`).
 
 ### Help
 
@@ -100,9 +100,9 @@ export DEVCENTER_BASE_URL=http://localhost:3000
 npm test
 ```
 
-Runs **c8** coverage checks on `src/**/*.ts` (80% thresholds), then **ESLint**. Command tests set `DEVCENTER_CLI_TEST=1` so the browser is not opened.
+Runs **c8** coverage checks on `src/**/*.ts` (80% thresholds), then **ESLint**. Command tests set **`DEVCENTER_CLI_TEST=1`** so the browser is not opened.
 
-Integration tests set `DEVCENTER_CLI_CWD` to a temp directory so article files are isolated without changing the process working directory away from the plugin root (required for oclif to load `package.json`). This variable is only for tests; normal usage relies on the current working directory.
+Integration tests set **`DEVCENTER_CLI_CWD`** to a temp directory so article files are isolated without changing the process working directory away from the plugin root (required for oclif to load `package.json`). **`DEVCENTER_CLI_TEST_CONFIRM`** is used for pull overwrite prompts so runs stay non-interactive. These variables are only for tests; normal usage relies on the current working directory.
 
 After changing commands under `src/commands/`, run `npm run readme` so `README.md` and `docs/` stay in sync (the `version` npm script does this when publishing).
 

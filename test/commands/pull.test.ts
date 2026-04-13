@@ -88,8 +88,8 @@ describe('devcenter:pull', function () {
     writeFileSync(
       join(noNetrcHome, '.netrc'),
       `machine api.heroku.com
-login t@t.com
-password ${token}
+  login t@t.com
+  password ${token}
 `,
       'utf8',
     )
@@ -117,8 +117,8 @@ password ${token}
     writeFileSync(
       join(noNetrcHome, '.netrc'),
       `machine api.heroku.com
-login t@t.com
-password ${token}
+  login t@t.com
+  password ${token}
 `,
       'utf8',
     )
