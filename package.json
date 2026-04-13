@@ -59,7 +59,7 @@
     "express": "^5.2.1",
     "markdown-it": "^14.1.1",
     "markdown-it-anchor": "^9.2.0",
-    "netrc": "^0.1.4",
+    "netrc-parser": "3.1.6",
     "open": "^11.0.0",
     "yaml": "^2.8.3"
   },

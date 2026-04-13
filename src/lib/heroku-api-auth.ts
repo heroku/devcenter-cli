@@ -1,29 +1,21 @@
-import netrc from 'netrc'
-import {existsSync} from 'node:fs'
-import {homedir} from 'node:os'
-import {join} from 'node:path'
+import {Netrc} from 'netrc-parser'
 
 /**
- * Heroku API token from `~/.netrc` (`api.heroku.com`), same source as `heroku login`.
- * Encrypted `~/.netrc.gpg` is not supported.
+ * Heroku API token for `api.heroku.com` from netrc, same resolution as the Heroku CLI
+ * (`netrc-parser`: plain `~/.netrc` or `~/.netrc.gpg` when present, decrypted via `gpg`).
  */
 export function getHerokuApiToken(): string {
-  const home = homedir()
-  const gpgPath = join(home, '.netrc.gpg')
-  const plainPath = join(home, '.netrc')
-  if (existsSync(gpgPath)) {
-    throw new Error('Encrypted ~/.netrc.gpg is not supported by this plugin. Use a plain ~/.netrc (e.g. after `heroku login`) or decrypt netrc separately.')
+  const netrc = new Netrc()
+  try {
+    netrc.loadSync()
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    throw new Error(`Heroku credentials could not be loaded: ${message}`)
   }
 
-  if (!existsSync(plainPath)) {
-    throw new Error('Heroku credentials not found. Run `heroku login` to create ~/.netrc.')
-  }
-
-  const auth = netrc(plainPath)
-  const entry = auth['api.heroku.com']
-  const token = entry?.password
+  const token = netrc.machines['api.heroku.com']?.password
   if (!token) {
-    throw new Error('Heroku credentials not found. Run `heroku login` to create ~/.netrc.')
+    throw new Error('Heroku credentials not found. Run `heroku login`.')
   }
 
   return token
