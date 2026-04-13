@@ -20,9 +20,20 @@ heroku plugins:link .
 
 Requires [Node.js](https://nodejs.org/) 22+ and the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli).
 
+## Issues
+
+Use the [GitHub Issues](https://github.com/heroku/devcenter-cli/issues) page for bugs, feature requests, and ideas.
+
+<!-- commands -->
+# Command Topics
+
+* [`heroku devcenter`](docs/devcenter.md) - interact with Heroku Dev Center
+
+<!-- commandsstop -->
+
 ## Usage
 
-Commands are exposed under the `devcenter` topic, for example `heroku devcenter:open`.
+Common workflows for the `devcenter` commands (see the generated command reference above and under `docs/` for flags and full help):
 
 ### Open a published article
 
@@ -92,6 +103,12 @@ npm test
 Runs **c8** coverage checks on `src/**/*.ts` (80% thresholds), then **ESLint**. Command tests set `DEVCENTER_CLI_TEST=1` so the browser is not opened.
 
 Integration tests set `DEVCENTER_CLI_CWD` to a temp directory so article files are isolated without changing the process working directory away from the plugin root (required for oclif to load `package.json`). This variable is only for tests; normal usage relies on the current working directory.
+
+After changing commands under `src/commands/`, run `npm run readme` so `README.md` and `docs/` stay in sync (the `version` npm script does this when publishing).
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 

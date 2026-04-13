@@ -49,7 +49,9 @@
     "prepare": "npm run build",
     "posttest": "npm run lint",
     "pretest": "npm run build",
-    "test": "c8 --all --check-coverage --reporter=lcov --reporter=text-summary mocha --forbid-only \"test/**/*.test.ts\""
+    "readme": "oclif readme --multi",
+    "test": "c8 --all --check-coverage --reporter=lcov --reporter=text-summary mocha --forbid-only \"test/**/*.test.ts\"",
+    "version": "oclif readme --multi && git add README.md docs"
   },
   "dependencies": {
     "@heroku-cli/command": "^12.2.0",
