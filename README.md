@@ -34,7 +34,7 @@ This will open a preview in your default browser and get it refreshed when you s
 
     $ devcenter push dynos
 
-This will save the title and content from your local article in Dev Center, using your Heroku credentials from `~/.netrc`, which you can set by doing `heroku auth:login`.
+This will save the title and content from your local article in Dev Center, using your Heroku API credentials from netrc: plain `~/.netrc` or encrypted `~/.netrc.gpg` (decrypted with `gpg` when applicable), the same store as the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli) after `heroku login`.
 
 ### Help
 
@@ -48,6 +48,7 @@ Get help about a specific command
 
 ### Heroku CLI plugin (optional)
 
+<<<<<<< HEAD
 With Node 22+ and the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli), install the plugin and use the `devcenter` topic (same capabilities as the gem commands above):
 
 ```bash
@@ -55,6 +56,9 @@ heroku plugins:install @heroku-cli/heroku-cli-plugin-devcenter
 ```
 
 For local development from this repository:
+=======
+With Node 22+ and the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli), you can link this repo and use **`heroku devcenter:open`** and **`heroku devcenter:preview`** (same behavior as `devcenter open` / `devcenter preview` above). Authentication for any Heroku API use matches the CLI: `~/.netrc` or `~/.netrc.gpg` and `heroku login`. Install from a clone:
+>>>>>>> origin/feat/ruby-to-typescript-1
 
 ```bash
 npm install
