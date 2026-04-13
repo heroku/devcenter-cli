@@ -5,14 +5,24 @@ import {join} from 'node:path'
 
 import {basicAuthHeaderValue, getHerokuApiToken} from '../../src/lib/heroku-api-auth.js'
 
+/** Same basename `netrc-parser` uses in `Netrc.defaultFile` (`.netrc` vs `_netrc` on Windows). */
+function netrcFilePath(home: string): string {
+  return join(home, process.platform === 'win32' ? '_netrc' : '.netrc')
+}
+
 describe('heroku-api-auth', function () {
   let fakeHome: string
   let previousHome: string | undefined
+  let previousUserProfile: string | undefined
 
   beforeEach(function () {
     fakeHome = mkdtempSync(join(tmpdir(), 'devcenter-netrc-'))
     previousHome = process.env.HOME
     process.env.HOME = fakeHome
+    if (process.platform === 'win32') {
+      previousUserProfile = process.env.USERPROFILE
+      process.env.USERPROFILE = fakeHome
+    }
   })
 
   afterEach(function () {
@@ -22,13 +32,21 @@ describe('heroku-api-auth', function () {
       process.env.HOME = previousHome
     }
 
+    if (process.platform === 'win32') {
+      if (previousUserProfile === undefined) {
+        delete process.env.USERPROFILE
+      } else {
+        process.env.USERPROFILE = previousUserProfile
+      }
+    }
+
     rmSync(fakeHome, {force: true, recursive: true})
   })
 
   describe('getHerokuApiToken', function () {
-    it('reads api.heroku.com password from plain ~/.netrc', function () {
+    it('reads api.heroku.com password from plain netrc', function () {
       writeFileSync(
-        join(fakeHome, '.netrc'),
+        netrcFilePath(fakeHome),
         'machine api.heroku.com\n  login mail@example.com\n  password THE_TOKEN\n',
         'utf8',
       )
@@ -37,7 +55,7 @@ describe('heroku-api-auth', function () {
 
     it('throws when api.heroku.com is missing', function () {
       writeFileSync(
-        join(fakeHome, '.netrc'),
+        netrcFilePath(fakeHome),
         'machine other.example\n  login x\n  password y\n',
         'utf8',
       )
