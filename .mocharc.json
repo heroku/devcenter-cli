@@ -1,5 +1,6 @@
 {
   "require": [
+    "./test/init.mjs",
     "tsx"
   ],
   "watch-extensions": ["ts"],

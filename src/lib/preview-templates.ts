@@ -2,10 +2,10 @@ import type {ArticleFile} from './article-file.js'
 
 function esc(s: string): string {
   return s
-  .replaceAll('&', '&amp;')
-  .replaceAll('<', '&lt;')
-  .replaceAll('>', '&gt;')
-  .replaceAll('"', '&quot;')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
 }
 
 const PREVIEW_CSS = `
@@ -32,8 +32,8 @@ export function renderPreviewPage(article: ArticleFile, slug: string): {html: st
   let inner: string
   if (article.html) {
     const tocItems = article.toc
-    .map(s => `<li><a href="#${esc(s.id)}">${esc(s.text)}</a></li>`)
-    .join('')
+      .map(s => `<li><a href="#${esc(s.id)}">${esc(s.text)}</a></li>`)
+      .join('')
     const tocBlock
       = tocItems.length > 0
         ? `<div id="table-of-contents"><h3>Table of Contents</h3><ul>${tocItems}</ul></div>`
