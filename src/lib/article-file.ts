@@ -36,14 +36,14 @@ export class ArticleFile {
     if (this.html) {
       const $ = cheerio.load(this.html)
       this.toc = $('h2')
-      .toArray()
-      .map(el => {
-        const $el = $(el)
-        return {
-          id: $el.attr('id') ?? '',
-          text: $el.text(),
-        }
-      })
+        .toArray()
+        .map(el => {
+          const $el = $(el)
+          return {
+            id: $el.attr('id') ?? '',
+            text: $el.text(),
+          }
+        })
     } else {
       this.toc = []
     }

@@ -1,12 +1,16 @@
 import {expect} from 'chai'
+import debug from 'debug'
+import childProcess from 'node:child_process'
 import {
   mkdtempSync, readFileSync, rmSync, writeFileSync,
 } from 'node:fs'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
+import sinon from 'sinon'
 import request from 'supertest'
 
 import {createPreviewApp, runPreview} from '../../src/lib/preview-server.js'
+import {stubOpen} from '../helpers/stub-open.js'
 
 describe('createPreviewApp', function () {
   let workDir: string
@@ -26,6 +30,7 @@ describe('createPreviewApp', function () {
     }
 
     rmSync(workDir, {recursive: true})
+    sinon.restore()
   })
 
   it('returns 200 and article HTML when the markdown file exists', async function () {
@@ -39,19 +44,19 @@ id: 1
       'utf8',
     )
 
-    const {app} = createPreviewApp(() => {})
+    const {app} = createPreviewApp()
     const res = await request(app).get('/hello').expect(200)
     expect(res.text).to.contain('Hello Title')
     expect(res.text).to.contain('Section')
   })
 
   it('returns 404 HTML when the markdown file is missing', async function () {
-    const {app} = createPreviewApp(() => {})
+    const {app} = createPreviewApp()
     const res = await request(app).get('/missing').expect(404)
     expect(res.text).to.contain('Ooops')
   })
 
-  it('routes verbose request logs through debugLog when provided', async function () {
+  it('routes verbose request logs through debug when enabled', async function () {
     writeFileSync(
       join(workDir, 'trace.md'),
       `title: T
@@ -63,23 +68,32 @@ x
     )
 
     const lines: string[] = []
-    const {app} = createPreviewApp(() => {}, m => {
-      lines.push(m)
-    })
+    const origLog = debug.log
+    debug.log = (...args: unknown[]) => {
+      lines.push(args.map(String).join(' '))
+    }
 
-    await request(app).get('/trace').expect(200)
+    debug.enable('devcenter:preview')
+    try {
+      const {app} = createPreviewApp()
+      await request(app).get('/trace').expect(200)
+    } finally {
+      debug.disable()
+      debug.log = origLog
+    }
+
     expect(lines.some(l => l.includes('Local article requested'))).to.equal(true)
     expect(lines.some(l => l.includes('Parsing'))).to.equal(true)
     expect(lines.some(l => l.includes('Serving'))).to.equal(true)
   })
 
   it('returns 204 for favicon', async function () {
-    const {app} = createPreviewApp(() => {})
+    const {app} = createPreviewApp()
     await request(app).get('/favicon.ico').expect(204)
   })
 
   it('opens an SSE stream then aborts cleanly', async function () {
-    const {app} = createPreviewApp(() => {})
+    const {app} = createPreviewApp()
     await new Promise<void>(resolve => {
       const r = request(app).get('/stream').end(() => {
         resolve()
@@ -91,9 +105,9 @@ x
     })
   })
 
-  it('runPreview listens and exits when SIGINT is emitted', async function () {
-    const previousTest = process.env.DEVCENTER_CLI_TEST
-    process.env.DEVCENTER_CLI_TEST = '1'
+  it('runPreview listens, opens browser, and exits when SIGINT is emitted', async function () {
+    stubOpen()
+
     const mdPath = join(workDir, 'live.md')
     writeFileSync(
       mdPath,
@@ -105,16 +119,15 @@ content
       'utf8',
     )
 
-    const logs: string[] = []
-    const debugLogs: string[] = []
+    const lines: string[] = []
+    const origLog = debug.log
+    debug.log = (...args: unknown[]) => {
+      lines.push(args.map(String).join(' '))
+    }
+
+    debug.enable('devcenter:preview')
     const run = runPreview({
-      debugLog(m) {
-        debugLogs.push(m)
-      },
       host: '127.0.0.1',
-      log(m) {
-        logs.push(m)
-      },
       mdPath,
       port: 38_471,
       slug: 'live',
@@ -128,11 +141,10 @@ content
     await run
     clearTimeout(touch)
     clearTimeout(t)
-    expect(debugLogs.some(l => l.includes('File modified'))).to.equal(true)
-    if (previousTest === undefined) {
-      delete process.env.DEVCENTER_CLI_TEST
-    } else {
-      process.env.DEVCENTER_CLI_TEST = previousTest
-    }
+    debug.disable()
+    debug.log = origLog
+
+    expect(lines.some(l => l.includes('File modified'))).to.equal(true)
+    expect((childProcess.spawn as sinon.SinonStub).called).to.equal(true)
   })
 })

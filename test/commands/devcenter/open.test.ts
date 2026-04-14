@@ -1,44 +1,56 @@
+import {runCommand} from '@heroku-cli/test-utils'
 import {expect} from 'chai'
+import debug from 'debug'
 import nock from 'nock'
+import childProcess from 'node:child_process'
+import sinon from 'sinon'
 
 import Open from '../../../src/commands/devcenter/open.js'
-import {runCommand} from '../../helpers/run-command.js'
+import {PLUGIN_ROOT} from '../../helpers/plugin-root.js'
+import {stubOpen} from '../../helpers/stub-open.js'
 
 describe('devcenter:open', function () {
-  let previousTest: string | undefined
-
   beforeEach(function () {
-    previousTest = process.env.DEVCENTER_CLI_TEST
-    process.env.DEVCENTER_CLI_TEST = '1'
+    stubOpen()
   })
 
   afterEach(function () {
     nock.cleanAll()
-    if (previousTest === undefined) {
-      delete process.env.DEVCENTER_CLI_TEST
+    sinon.restore()
+  })
+
+  it('succeeds when HEAD succeeds and opens browser', async function () {
+    nock('https://devcenter.heroku.com', {reqheaders: {'user-agent': 'DevCenterCLI'}})
+      .head('/articles/my-article')
+      .reply(200)
+
+    const {error} = await runCommand(Open, ['my-article'], {root: PLUGIN_ROOT})
+    expect(error).to.equal(undefined)
+    expect((childProcess.spawn as sinon.SinonStub).called).to.equal(true)
+  })
+
+  it('logs debug lines to stderr when DEBUG enables devcenter:open', async function () {
+    const previousDebug = process.env.DEBUG
+    process.env.DEBUG = 'devcenter:open'
+    debug.enable('devcenter:open')
+
+    nock('https://devcenter.heroku.com', {reqheaders: {'user-agent': 'DevCenterCLI'}})
+      .head('/articles/dbg')
+      .reply(200)
+
+    const {error, stderr} = await runCommand(Open, ['dbg'], {root: PLUGIN_ROOT})
+
+    if (previousDebug === undefined) {
+      debug.disable()
+      delete process.env.DEBUG
     } else {
-      process.env.DEVCENTER_CLI_TEST = previousTest
+      process.env.DEBUG = previousDebug
+      debug.enable(previousDebug)
     }
-  })
 
-  it('succeeds when HEAD succeeds (browser open skipped in tests)', async function () {
-    nock('https://devcenter.heroku.com', {reqheaders: {'user-agent': 'DevCenterCLI'}})
-    .head('/articles/my-article')
-    .reply(200)
-
-    const {error} = await runCommand(Open, ['my-article'])
     expect(error).to.equal(undefined)
-  })
-
-  it('prints debug lines when --debug is set', async function () {
-    nock('https://devcenter.heroku.com', {reqheaders: {'user-agent': 'DevCenterCLI'}})
-    .head('/articles/dbg')
-    .reply(200)
-
-    const {error, stdout} = await runCommand(Open, ['dbg', '--debug'])
-    expect(error).to.equal(undefined)
-    expect(stdout).to.contain('devcenter:')
-    expect(stdout).to.contain('Connecting')
+    expect(stderr).to.match(/Connecting/)
+    expect(stderr).to.match(/Page found/)
   })
 
   it('fails with redirect message when HEAD returns 302', async function () {
@@ -46,29 +58,29 @@ describe('devcenter:open', function () {
       Location: 'https://devcenter.heroku.com/articles/new',
     })
 
-    const {error} = await runCommand(Open, ['old'])
+    const {error} = await runCommand(Open, ['old'], {root: PLUGIN_ROOT})
     expect(error?.message).to.contain('Redirected')
   })
 
   it('fails with not-found hints when HEAD returns 404', async function () {
     nock('https://devcenter.heroku.com').head('/articles/missing').reply(404)
     nock('https://devcenter.heroku.com')
-    .get('/api/v1/search.json')
-    .query({query: 'missing'})
-    .reply(200, {results: []})
+      .get('/api/v1/search.json')
+      .query({query: 'missing'})
+      .reply(200, {results: []})
 
-    const {error} = await runCommand(Open, ['missing'])
+    const {error} = await runCommand(Open, ['missing'], {root: PLUGIN_ROOT})
     expect(error?.message).to.contain('No missing article found')
   })
 
   it('errors when slug is empty', async function () {
-    const {error} = await runCommand(Open, ['  '])
+    const {error} = await runCommand(Open, ['  '], {root: PLUGIN_ROOT})
     expect(error?.message).to.contain('Please provide a slug')
   })
 
   it('fails on unexpected HEAD status', async function () {
     nock('https://devcenter.heroku.com').head('/articles/boom').reply(500)
-    const {error} = await runCommand(Open, ['boom'])
+    const {error} = await runCommand(Open, ['boom'], {root: PLUGIN_ROOT})
     expect(error?.message).to.contain('Unexpected response')
   })
 })

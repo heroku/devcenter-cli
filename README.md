@@ -58,11 +58,78 @@ heroku plugins:link .
 
 `pull` and `push` remain on the Ruby gem until a later release.
 
+## `heroku devcenter`
+
+<!-- usage -->
+```sh-session
+$ npm install -g @heroku-cli/heroku-cli-plugin-devcenter
+$ heroku COMMAND
+running command...
+$ heroku (--version)
+@heroku-cli/heroku-cli-plugin-devcenter/1.3.1 darwin-arm64 node-v24.14.0
+$ heroku --help [COMMAND]
+USAGE
+  $ heroku COMMAND
+...
+```
+<!-- usagestop -->
+
+<!-- commands -->
+* [`heroku devcenter:open SLUG`](#heroku-devcenteropen-slug)
+* [`heroku devcenter:preview SLUG`](#heroku-devcenterpreview-slug)
+
+## `heroku devcenter:open SLUG`
+
+open a published Dev Center article in your browser
+
+```
+USAGE
+  $ heroku devcenter:open SLUG [--prompt]
+
+ARGUMENTS
+  SLUG  article slug (e.g. ps for https://devcenter.heroku.com/articles/ps)
+
+GLOBAL FLAGS
+  --prompt  interactively prompt for command arguments and flags
+
+DESCRIPTION
+  open a published Dev Center article in your browser
+```
+
+_See code: [src/commands/devcenter/open.ts](https://github.com/heroku/devcenter-cli/blob/v1.3.1/src/commands/devcenter/open.ts)_
+
+## `heroku devcenter:preview SLUG`
+
+preview a local Dev Center article in the browser with live reload
+
+```
+USAGE
+  $ heroku devcenter:preview SLUG [--prompt] [--host <value>] [--port <value>]
+
+ARGUMENTS
+  SLUG  article slug (local <slug>.md file)
+
+FLAGS
+  --host=<value>  [default: 127.0.0.1] bind host for the preview server
+  --port=<value>  [default: 3000] port for the preview server
+
+GLOBAL FLAGS
+  --prompt  interactively prompt for command arguments and flags
+
+DESCRIPTION
+  preview a local Dev Center article in the browser with live reload
+```
+
+_See code: [src/commands/devcenter/preview.ts](https://github.com/heroku/devcenter-cli/blob/v1.3.1/src/commands/devcenter/preview.ts)_
+<!-- commandsstop -->
+
 ### Development
 
 If you have a Dev Center instance, you can point your CLI to it by setting the `DEVCENTER_BASE_URL` env. var (e.g: `export DEVCENTER_BASE_URL=http://localhost:3000`).
 
-TypeScript code lives under `src/` with tests under `test/`. With Node 22+, run `npm install` and `npm test`. Command tests set `DEVCENTER_CLI_TEST=1` (and `DEVCENTER_CLI_CWD` where needed) so the browser is not opened during runs.
+TypeScript code lives under `src/` with tests under `test/`. With Node 22+, run `npm install` and `npm test`. Tests stub `child_process.spawn` (via sinon) so browser opens are mocked. `DEVCENTER_CLI_CWD` can override the article working directory in tests.
+
+Verbose logging uses the [`debug`](https://www.npmjs.com/package/debug) package, for example `DEBUG=devcenter:open`, `DEBUG=devcenter:preview`, or `DEBUG=devcenter:*`.
 
 ## License
 

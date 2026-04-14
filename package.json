@@ -16,7 +16,8 @@
     "oclif"
   ],
   "files": [
-    "dist"
+    "dist",
+    "oclif.manifest.json"
   ],
   "exports": {
     ".": {
@@ -54,6 +55,7 @@
   "dependencies": {
     "@heroku-cli/command": "^12.2.0",
     "@oclif/core": "^4.3.0",
+    "@oclif/plugin-help": "^6.2.36",
     "cheerio": "^1.2.0",
     "chokidar": "^5.0.0",
     "debug": "^4.4.3",
@@ -64,8 +66,13 @@
     "open": "^11.0.0",
     "yaml": "^2.8.3"
   },
+  "overrides": {
+    "mocha": {
+      "serialize-javascript": "^7.0.5"
+    }
+  },
   "devDependencies": {
-    "@oclif/plugin-help": "^6.2.36",
+    "@heroku-cli/test-utils": "^0.2.0",
     "@types/chai": "^5.2.3",
     "@types/debug": "^4.1.12",
     "@types/express": "^5.0.6",
@@ -81,11 +88,9 @@
     "mocha": "^11.7.5",
     "nock": "^14.0.12",
     "oclif": "^4.22.81",
+    "sinon": "^21.0.3",
     "supertest": "^7.2.2",
     "tsx": "^4.21.0",
     "typescript": "^5.4.0"
-  },
-  "overrides": {
-    "serialize-javascript": "^7.0.3"
   }
 }

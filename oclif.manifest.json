@@ -1,0 +1,93 @@
+{
+  "commands": {
+    "devcenter:open": {
+      "aliases": [],
+      "args": {
+        "slug": {
+          "description": "article slug (e.g. ps for https://devcenter.heroku.com/articles/ps)",
+          "name": "slug",
+          "required": true
+        }
+      },
+      "description": "open a published Dev Center article in your browser",
+      "flags": {
+        "prompt": {
+          "description": "interactively prompt for command arguments and flags",
+          "helpGroup": "GLOBAL",
+          "name": "prompt",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "devcenter:open",
+      "pluginAlias": "@heroku-cli/heroku-cli-plugin-devcenter",
+      "pluginName": "@heroku-cli/heroku-cli-plugin-devcenter",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "promptFlagActive": true,
+      "isESM": true,
+      "relativePath": [
+        "dist",
+        "commands",
+        "devcenter",
+        "open.js"
+      ]
+    },
+    "devcenter:preview": {
+      "aliases": [],
+      "args": {
+        "slug": {
+          "description": "article slug (local <slug>.md file)",
+          "name": "slug",
+          "required": true
+        }
+      },
+      "description": "preview a local Dev Center article in the browser with live reload",
+      "flags": {
+        "prompt": {
+          "description": "interactively prompt for command arguments and flags",
+          "helpGroup": "GLOBAL",
+          "name": "prompt",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "host": {
+          "description": "bind host for the preview server",
+          "name": "host",
+          "default": "127.0.0.1",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "port": {
+          "description": "port for the preview server",
+          "name": "port",
+          "default": 3000,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "devcenter:preview",
+      "pluginAlias": "@heroku-cli/heroku-cli-plugin-devcenter",
+      "pluginName": "@heroku-cli/heroku-cli-plugin-devcenter",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "promptFlagActive": true,
+      "isESM": true,
+      "relativePath": [
+        "dist",
+        "commands",
+        "devcenter",
+        "preview.js"
+      ]
+    }
+  },
+  "version": "1.3.1"
+}
