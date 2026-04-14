@@ -1,3 +1,4 @@
+import {runCommand} from '@heroku-cli/test-utils'
 import {expect} from 'chai'
 import nock from 'nock'
 import {
@@ -8,7 +9,7 @@ import {join} from 'node:path'
 
 import Pull from '../../src/commands/devcenter/pull.js'
 import {netrcFilePath} from '../helpers/netrc-path.js'
-import {runCommand} from '../helpers/run-command.js'
+import {PLUGIN_ROOT} from '../helpers/plugin-root.js'
 import {
   applyHomeEnv, type HomeEnvSnapshot, setHomeDirForTests, snapshotHomeEnv,
 } from '../helpers/test-home-env.js'
@@ -52,15 +53,15 @@ describe('devcenter:pull', function () {
 
   it('writes a local markdown file from the Dev Center API', async function () {
     nock('https://devcenter.heroku.com')
-    .get('/articles/acme.json')
-    .reply(200, {
-      content: 'Article **body**.',
-      id: 7,
-      slug: 'acme',
-      title: 'Acme Co',
-    })
+      .get('/articles/acme.json')
+      .reply(200, {
+        content: 'Article **body**.',
+        id: 7,
+        slug: 'acme',
+        title: 'Acme Co',
+      })
 
-    const {error} = await runCommand(Pull, ['acme', '--force'])
+    const {error} = await runCommand(Pull, ['acme', '--force'], {root: PLUGIN_ROOT})
     expect(error).to.equal(undefined)
 
     const written = readFileSync(join(workDir, 'acme.md'), 'utf8')
@@ -71,16 +72,16 @@ describe('devcenter:pull', function () {
   it('errors when the article cannot be loaded', async function () {
     nock('https://devcenter.heroku.com').get('/articles/nope.json').reply(404, {})
     nock('https://devcenter.heroku.com')
-    .get('/api/v1/search.json')
-    .query({query: 'nope'})
-    .reply(200, {results: []})
+      .get('/api/v1/search.json')
+      .query({query: 'nope'})
+      .reply(200, {results: []})
 
-    const {error} = await runCommand(Pull, ['nope', '--force'])
+    const {error} = await runCommand(Pull, ['nope', '--force'], {root: PLUGIN_ROOT})
     expect(error?.message).to.contain('No nope article found')
   })
 
   it('errors when slug is empty after parsing', async function () {
-    const {error} = await runCommand(Pull, ['  '])
+    const {error} = await runCommand(Pull, ['  '], {root: PLUGIN_ROOT})
     expect(error?.message).to.contain('Please provide an article slug')
   })
 
@@ -99,15 +100,15 @@ describe('devcenter:pull', function () {
     nock('https://devcenter.heroku.com', {
       reqheaders: {authorization: `Basic ${Buffer.from(token).toString('base64')}`},
     })
-    .get('/articles/draftish.json')
-    .reply(200, {
-      content: 'Draft **body**.',
-      id: 99,
-      slug: 'draftish',
-      title: 'Draft Title',
-    })
+      .get('/articles/draftish.json')
+      .reply(200, {
+        content: 'Draft **body**.',
+        id: 99,
+        slug: 'draftish',
+        title: 'Draft Title',
+      })
 
-    const {error} = await runCommand(Pull, ['draftish', '--force'])
+    const {error} = await runCommand(Pull, ['draftish', '--force'], {root: PLUGIN_ROOT})
     expect(error).to.equal(undefined)
     expect(readFileSync(join(workDir, 'draftish.md'), 'utf8')).to.contain('Draft **body**.')
   })
@@ -126,18 +127,18 @@ describe('devcenter:pull', function () {
 
     nock('https://devcenter.heroku.com').get('/articles/private-only.json').reply(401, {error: 'Authentication required'})
     nock('https://devcenter.heroku.com', {reqheaders: auth})
-    .get('/articles/private-only.json')
-    .reply(401, {error: 'Authentication required'})
+      .get('/articles/private-only.json')
+      .reply(401, {error: 'Authentication required'})
     nock('https://devcenter.heroku.com', {reqheaders: auth})
-    .get('/api/v1/private/articles/private-only.json')
-    .reply(200, {
-      content: 'From **private** API.',
-      id: 42,
-      slug: 'private-only',
-      title: 'Private Only Title',
-    })
+      .get('/api/v1/private/articles/private-only.json')
+      .reply(200, {
+        content: 'From **private** API.',
+        id: 42,
+        slug: 'private-only',
+        title: 'Private Only Title',
+      })
 
-    const {error} = await runCommand(Pull, ['private-only', '--force'])
+    const {error} = await runCommand(Pull, ['private-only', '--force'], {root: PLUGIN_ROOT})
     expect(error).to.equal(undefined)
     expect(readFileSync(join(workDir, 'private-only.md'), 'utf8')).to.contain('From **private** API.')
   })
@@ -145,16 +146,16 @@ describe('devcenter:pull', function () {
   it('does not overwrite when user declines the prompt', async function () {
     writeFileSync(join(workDir, 'keep.md'), 'title: Old\nid: 1\n\nold', 'utf8')
     nock('https://devcenter.heroku.com')
-    .get('/articles/keep.json')
-    .reply(200, {
-      content: 'new body',
-      id: 1,
-      slug: 'keep',
-      title: 'New',
-    })
+      .get('/articles/keep.json')
+      .reply(200, {
+        content: 'new body',
+        id: 1,
+        slug: 'keep',
+        title: 'New',
+      })
 
     process.env.DEVCENTER_CLI_TEST_CONFIRM = 'false'
-    const {error} = await runCommand(Pull, ['keep'])
+    const {error} = await runCommand(Pull, ['keep'], {root: PLUGIN_ROOT})
     expect(error).to.equal(undefined)
     expect(readFileSync(join(workDir, 'keep.md'), 'utf8')).to.contain('old')
   })

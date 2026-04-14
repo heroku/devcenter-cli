@@ -106,28 +106,28 @@ export default class Push extends Command {
 
 function statusVerb(status: string | undefined): string | undefined {
   switch (status) {
-  case 'archived': {
-    return 'archived'
-  }
+    case 'archived': {
+      return 'archived'
+    }
 
-  case 'draft': {
-    return 'pushed in draft mode'
-  }
+    case 'draft': {
+      return 'pushed in draft mode'
+    }
 
-  case 'published': {
-    return 'published'
-  }
+    case 'published': {
+      return 'published'
+    }
 
-  case 'published_quietly': {
-    return 'published quietly'
-  }
+    case 'published_quietly': {
+      return 'published quietly'
+    }
 
-  case 'staging': {
-    return 'pushed as staging mode'
-  }
+    case 'staging': {
+      return 'pushed as staging mode'
+    }
 
-  default: {
-    return undefined
-  }
+    default: {
+      return undefined
+    }
   }
 }
