@@ -42,7 +42,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "build": "npm run clean && tsc && oclif manifest && mv oclif.manifest.json ./dist/oclif.manifest.json",
+    "build": "npm run clean && tsc && oclif manifest && oclif readme",
     "clean": "rm -rf dist",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
