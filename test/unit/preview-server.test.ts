@@ -51,6 +51,28 @@ id: 1
     expect(res.text).to.contain('Ooops')
   })
 
+  it('routes verbose request logs through debugLog when provided', async function () {
+    writeFileSync(
+      join(workDir, 'trace.md'),
+      `title: T
+id: 1
+
+x
+`,
+      'utf8',
+    )
+
+    const lines: string[] = []
+    const {app} = createPreviewApp(() => {}, m => {
+      lines.push(m)
+    })
+
+    await request(app).get('/trace').expect(200)
+    expect(lines.some(l => l.includes('Local article requested'))).to.equal(true)
+    expect(lines.some(l => l.includes('Parsing'))).to.equal(true)
+    expect(lines.some(l => l.includes('Serving'))).to.equal(true)
+  })
+
   it('returns 204 for favicon', async function () {
     const {app} = createPreviewApp(() => {})
     await request(app).get('/favicon.ico').expect(204)
@@ -84,7 +106,11 @@ content
     )
 
     const logs: string[] = []
+    const debugLogs: string[] = []
     const run = runPreview({
+      debugLog(m) {
+        debugLogs.push(m)
+      },
       host: '127.0.0.1',
       log(m) {
         logs.push(m)
@@ -102,7 +128,7 @@ content
     await run
     clearTimeout(touch)
     clearTimeout(t)
-    expect(logs.some(l => l.includes('File modified'))).to.equal(true)
+    expect(debugLogs.some(l => l.includes('File modified'))).to.equal(true)
     if (previousTest === undefined) {
       delete process.env.DEVCENTER_CLI_TEST
     } else {

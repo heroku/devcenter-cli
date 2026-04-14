@@ -5,6 +5,7 @@ import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 
 import Push from '../../src/commands/devcenter/push.js'
+import {netrcFilePath} from '../helpers/netrc-path.js'
 import {runCommand} from '../helpers/run-command.js'
 import {
   applyHomeEnv, type HomeEnvSnapshot, setHomeDirForTests, snapshotHomeEnv,
@@ -24,7 +25,7 @@ describe('devcenter:push', function () {
     setHomeDirForTests(netrcHome)
     process.env.DEVCENTER_CLI_CWD = workDir
     writeFileSync(
-      join(netrcHome, '.netrc'),
+      netrcFilePath(netrcHome),
       `machine api.heroku.com
   login test@heroku.com
   password fake-api-token-for-tests

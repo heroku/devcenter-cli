@@ -8,6 +8,7 @@ import {
   basicAuthHeaderValue,
   getHerokuApiToken,
 } from '../../src/lib/heroku-api-auth.js'
+import {netrcFilePath} from '../helpers/netrc-path.js'
 import {
   applyHomeEnv, type HomeEnvSnapshot, setHomeDirForTests, snapshotHomeEnv,
 } from '../helpers/test-home-env.js'
@@ -27,34 +28,33 @@ describe('heroku-api-auth', function () {
     rmSync(fakeHome, {force: true, recursive: true})
   })
 
-  it('getHerokuApiToken returns the password for api.heroku.com', function () {
-    writeFileSync(
-      join(fakeHome, '.netrc'),
-      `machine api.heroku.com
-  login x@y.com
-  password my-secret-token
-`,
-      'utf8',
-    )
-    expect(getHerokuApiToken()).to.equal('my-secret-token')
+  describe('getHerokuApiToken', function () {
+    it('reads api.heroku.com password from plain netrc', function () {
+      writeFileSync(
+        netrcFilePath(fakeHome),
+        'machine api.heroku.com\n  login mail@example.com\n  password THE_TOKEN\n',
+        'utf8',
+      )
+      expect(getHerokuApiToken()).to.equal('THE_TOKEN')
+    })
+
+    it('throws when api.heroku.com is missing', function () {
+      writeFileSync(
+        netrcFilePath(fakeHome),
+        'machine other.example\n  login x\n  password y\n',
+        'utf8',
+      )
+      expect(() => getHerokuApiToken()).to.throw(/Heroku credentials not found/)
+    })
   })
 
-  it('getHerokuApiToken throws when .netrc is missing', function () {
+  it('getHerokuApiToken throws when netrc is missing', function () {
     expect(() => getHerokuApiToken()).to.throw(/credentials not found|could not be loaded/i)
   })
 
   it('getHerokuApiToken throws when machine exists but password is missing', function () {
-    writeFileSync(join(fakeHome, '.netrc'), 'machine api.heroku.com\n  login only\n', 'utf8')
+    writeFileSync(netrcFilePath(fakeHome), 'machine api.heroku.com\n  login only\n', 'utf8')
     expect(() => getHerokuApiToken()).to.throw(/credentials not found/i)
-  })
-
-  it('getHerokuApiToken throws when api.heroku.com is missing', function () {
-    writeFileSync(
-      join(fakeHome, '.netrc'),
-      'machine other.example\n  login x\n  password y\n',
-      'utf8',
-    )
-    expect(() => getHerokuApiToken()).to.throw(/Heroku credentials not found/)
   })
 
   it('basicAuthHeaderValue matches legacy encoding', function () {
