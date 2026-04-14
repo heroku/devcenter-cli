@@ -11,17 +11,18 @@ describe('formatArticleNotFoundMessage', function () {
 
   it('includes search suggestions for devcenter article URLs', async function () {
     nock('https://devcenter.heroku.com')
-    .get('/api/v1/search.json')
-    .query({query: 'foo'})
-    .reply(200, {
-      results: [
-        {
-          full_url: 'https://devcenter.heroku.com/articles/foo-bar',
-          slug: 'foo-bar',
-          title: 'Foo Bar Title',
-        },
-      ],
-    })
+      .get('/api/v1/search.json')
+      .query({query: 'foo'})
+      .reply(200, {
+        results: [
+          {
+            // eslint-disable-next-line camelcase
+            full_url: 'https://devcenter.heroku.com/articles/foo-bar',
+            slug: 'foo-bar',
+            title: 'Foo Bar Title',
+          },
+        ],
+      })
 
     const client = new DevcenterClient()
     const msg = await formatArticleNotFoundMessage(client, 'foo')
@@ -33,17 +34,18 @@ describe('formatArticleNotFoundMessage', function () {
 
   it('ignores search hits that are not devcenter article URLs', async function () {
     nock('https://devcenter.heroku.com')
-    .get('/api/v1/search.json')
-    .query({query: 'x'})
-    .reply(200, {
-      results: [
-        {
-          full_url: 'https://example.com/articles/x',
-          slug: 'x',
-          title: 'External',
-        },
-      ],
-    })
+      .get('/api/v1/search.json')
+      .query({query: 'x'})
+      .reply(200, {
+        results: [
+          {
+            // eslint-disable-next-line camelcase
+            full_url: 'https://example.com/articles/x',
+            slug: 'x',
+            title: 'External',
+          },
+        ],
+      })
 
     const client = new DevcenterClient()
     const msg = await formatArticleNotFoundMessage(client, 'x')

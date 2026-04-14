@@ -10,8 +10,8 @@ describe('DevcenterClient', function () {
 
   it('head returns redirect with location header', async function () {
     nock('https://devcenter.heroku.com')
-    .head('/articles/moved')
-    .reply(302, undefined, {Location: 'https://devcenter.heroku.com/articles/new-slug'})
+      .head('/articles/moved')
+      .reply(302, undefined, {Location: 'https://devcenter.heroku.com/articles/new-slug'})
 
     const client = new DevcenterClient()
     const res = await client.head('/articles/moved')
@@ -31,10 +31,10 @@ describe('DevcenterClient', function () {
     nock('https://devcenter.heroku.com', {
       reqheaders: {authorization: `Basic ${Buffer.from('secret').toString('base64')}`},
     })
-    .get('/articles/z.json')
-    .reply(200, {
-      content: 'x', id: 1, slug: 'z', title: 'Z',
-    })
+      .get('/articles/z.json')
+      .reply(200, {
+        content: 'x', id: 1, slug: 'z', title: 'Z',
+      })
 
     const client = new DevcenterClient()
     const res = await client.getJson('/articles/z.json', undefined, {token: 'secret'})
@@ -44,9 +44,9 @@ describe('DevcenterClient', function () {
 
   it('getJson parses query params and tolerates invalid JSON body', async function () {
     nock('https://devcenter.heroku.com')
-    .get('/articles/x.json')
-    .query({foo: 'bar'})
-    .reply(200, 'not-json')
+      .get('/articles/x.json')
+      .query({foo: 'bar'})
+      .reply(200, 'not-json')
 
     const client = new DevcenterClient()
     const res = await client.getJson('/articles/x.json', {foo: 'bar'})
@@ -56,8 +56,8 @@ describe('DevcenterClient', function () {
 
   it('authForm parses JSON body and falls back to raw string on parse error', async function () {
     nock('https://devcenter.heroku.com')
-    .put('/api/v1/private/articles/1.json', () => true)
-    .reply(200, 'plain-text-not-json')
+      .put('/api/v1/private/articles/1.json', () => true)
+      .reply(200, 'plain-text-not-json')
 
     const client = new DevcenterClient()
     const res = await client.updateArticle('tok', 1, {'article[content]': 'c', 'article[title]': 't'})
@@ -67,8 +67,8 @@ describe('DevcenterClient', function () {
 
   it('validateArticle posts to the validate endpoint', async function () {
     nock('https://devcenter.heroku.com')
-    .post('/api/v1/private/articles/9/validate.json')
-    .reply(200, {})
+      .post('/api/v1/private/articles/9/validate.json')
+      .reply(200, {})
 
     const client = new DevcenterClient()
     const res = await client.validateArticle('tok', 9, {'article[title]': 'Hi'})
