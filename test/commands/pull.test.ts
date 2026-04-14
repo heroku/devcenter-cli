@@ -7,6 +7,7 @@ import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 
 import Pull from '../../src/commands/devcenter/pull.js'
+import {netrcFilePath} from '../helpers/netrc-path.js'
 import {runCommand} from '../helpers/run-command.js'
 import {
   applyHomeEnv, type HomeEnvSnapshot, setHomeDirForTests, snapshotHomeEnv,
@@ -86,7 +87,7 @@ describe('devcenter:pull', function () {
   it('retries with netrc auth when the public JSON request fails', async function () {
     const token = 'fake-pull-token'
     writeFileSync(
-      join(noNetrcHome, '.netrc'),
+      netrcFilePath(noNetrcHome),
       `machine api.heroku.com
   login t@t.com
   password ${token}
@@ -115,7 +116,7 @@ describe('devcenter:pull', function () {
     const token = 'fake-pull-token'
     const auth = {authorization: `Basic ${Buffer.from(token).toString('base64')}`}
     writeFileSync(
-      join(noNetrcHome, '.netrc'),
+      netrcFilePath(noNetrcHome),
       `machine api.heroku.com
   login t@t.com
   password ${token}
