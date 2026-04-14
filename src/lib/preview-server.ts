@@ -21,7 +21,7 @@ export type PreviewApp = {
  * Express app for local Dev Center preview (routes only; no listen).
  * `broadcastReload` notifies active `/stream` SSE connections (same as file save in `runPreview`).
  */
-export function createPreviewApp(log: PreviewLogger): PreviewApp {
+export function createPreviewApp(log: PreviewLogger, debugLog: PreviewLogger = () => {}): PreviewApp {
   const clients = new Set<Response>()
   const app = express()
 
@@ -46,7 +46,7 @@ export function createPreviewApp(log: PreviewLogger): PreviewApp {
 
   app.get('/:articleSlug', (req, res) => {
     const {articleSlug} = req.params
-    log(`Local article requested: ${articleSlug}`)
+    debugLog(`Local article requested: ${articleSlug}`)
     const srcPath = resolve(getArticleWorkingDirectory(), `${articleSlug}.md`)
     if (!existsSync(srcPath)) {
       const ref = typeof req.get('Referer') === 'string' ? req.get('Referer') : undefined
@@ -54,10 +54,10 @@ export function createPreviewApp(log: PreviewLogger): PreviewApp {
       return
     }
 
-    log('Parsing')
+    debugLog('Parsing')
     const article = ArticleFile.read(srcPath)
     const {html} = renderPreviewPage(article, articleSlug)
-    log('Serving')
+    debugLog('Serving')
     res.type('html').send(html)
   })
 
@@ -75,14 +75,15 @@ export function createPreviewApp(log: PreviewLogger): PreviewApp {
 }
 
 export async function runPreview(options: {
+  debugLog?: PreviewLogger
   host: string
   log: PreviewLogger
   mdPath: string
   port: number
   slug: string
 }): Promise<void> {
-  const {host, log, mdPath, port, slug} = options
-  const {app, broadcastReload} = createPreviewApp(log)
+  const {debugLog = () => {}, host, log, mdPath, port, slug} = options
+  const {app, broadcastReload} = createPreviewApp(log, debugLog)
 
   const server: Server = await new Promise(resolveListen => {
     const s = app.listen(port, host, () => {
@@ -91,14 +92,15 @@ export async function runPreview(options: {
   })
 
   const watcher = watch(mdPath, {ignoreInitial: true}).on('change', () => {
-    log(`File modified: ${mdPath}`)
+    debugLog(`File modified: ${mdPath}`)
     broadcastReload()
   })
 
   const url = `http://${host}:${port}/${slug}`
-  log(`\nLive preview for ${slug} available at ${url}`)
+  log('')
+  log(`Live preview for ${slug} available at ${url}`)
   log(`It will refresh when you save ${mdPath}`)
-  log('Press Ctrl+C to exit...\n')
+  log('Press Ctrl+C to exit...')
   if (!process.env.DEVCENTER_CLI_TEST) {
     await open(url)
   }

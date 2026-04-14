@@ -57,6 +57,7 @@
     "@oclif/core": "^4.3.0",
     "cheerio": "^1.2.0",
     "chokidar": "^5.0.0",
+    "debug": "^4.4.3",
     "express": "^5.2.1",
     "markdown-it": "^14.1.1",
     "markdown-it-anchor": "^9.2.0",
@@ -67,6 +68,7 @@
   "devDependencies": {
     "@oclif/plugin-help": "^6.2.36",
     "@types/chai": "^5.2.3",
+    "@types/debug": "^4.1.12",
     "@types/express": "^5.0.6",
     "@types/markdown-it": "^14.1.2",
     "@types/mocha": "^10.0.10",

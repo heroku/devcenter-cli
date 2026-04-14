@@ -4,6 +4,7 @@ import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 
 import {basicAuthHeaderValue, getHerokuApiToken} from '../../src/lib/heroku-api-auth.js'
+import {netrcFilePath} from '../helpers/netrc-path.js'
 
 describe('heroku-api-auth', function () {
   let fakeHome: string
@@ -26,9 +27,9 @@ describe('heroku-api-auth', function () {
   })
 
   describe('getHerokuApiToken', function () {
-    it('reads api.heroku.com password from plain ~/.netrc', function () {
+    it('reads api.heroku.com password from plain netrc', function () {
       writeFileSync(
-        join(fakeHome, '.netrc'),
+        netrcFilePath(fakeHome),
         'machine api.heroku.com\n  login mail@example.com\n  password THE_TOKEN\n',
         'utf8',
       )
@@ -37,7 +38,7 @@ describe('heroku-api-auth', function () {
 
     it('throws when api.heroku.com is missing', function () {
       writeFileSync(
-        join(fakeHome, '.netrc'),
+        netrcFilePath(fakeHome),
         'machine other.example\n  login x\n  password y\n',
         'utf8',
       )

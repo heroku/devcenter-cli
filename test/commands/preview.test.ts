@@ -1,4 +1,5 @@
 import {expect} from 'chai'
+import debug from 'debug'
 import {mkdtempSync, rmSync, writeFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
@@ -64,5 +65,42 @@ content
     const {error} = await run
     clearTimeout(t)
     expect(error).to.equal(undefined)
+  })
+
+  it('with --debug, logs HTTP handling to stderr (oclif this.debug)', async function () {
+    const prevDebug = process.env.DEBUG
+    delete process.env.DEBUG
+
+    writeFileSync(
+      join(workDir, 'x.md'),
+      `title: X
+id: 1
+
+body
+`,
+      'utf8',
+    )
+
+    const run = runCommand(Preview, ['x', '--port', '38476', '--debug'])
+    const fetchTimer = setTimeout(() => {
+      fetch('http://127.0.0.1:38476/x').catch(() => {})
+    }, 120)
+    const sigTimer = setTimeout(() => {
+      process.emit('SIGINT')
+    }, 400)
+
+    const {error, stderr} = await run
+    clearTimeout(fetchTimer)
+    clearTimeout(sigTimer)
+
+    if (prevDebug === undefined) {
+      debug.disable()
+      delete process.env.DEBUG
+    } else {
+      debug.enable(prevDebug)
+    }
+
+    expect(error).to.equal(undefined)
+    expect(stderr).to.match(/Local article requested|Parsing|Serving/)
   })
 })
