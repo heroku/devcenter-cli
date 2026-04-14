@@ -48,17 +48,7 @@ Get help about a specific command
 
 ### Heroku CLI plugin (optional)
 
-<<<<<<< HEAD
-With Node 22+ and the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli), install the plugin and use the `devcenter` topic (same capabilities as the gem commands above):
-
-```bash
-heroku plugins:install @heroku-cli/heroku-cli-plugin-devcenter
-```
-
-For local development from this repository:
-=======
 With Node 22+ and the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli), you can link this repo and use **`heroku devcenter:open`** and **`heroku devcenter:preview`** (same behavior as `devcenter open` / `devcenter preview` above). Authentication for any Heroku API use matches the CLI: `~/.netrc` or `~/.netrc.gpg` and `heroku login`. Install from a clone:
->>>>>>> origin/feat/ruby-to-typescript-1
 
 ```bash
 npm install
@@ -72,11 +62,124 @@ Commands mirror the gem: **`heroku devcenter:open`**, **`pull`**, **`preview`**,
 
 **Push:** uses the article id in your local `.md` file and Heroku API credentials in plain **`~/.netrc`** from **`heroku login`**.
 
+## `heroku devcenter`
+
+<!-- usage -->
+```sh-session
+$ npm install -g @heroku-cli/heroku-cli-plugin-devcenter
+$ heroku COMMAND
+running command...
+$ heroku (--version)
+@heroku-cli/heroku-cli-plugin-devcenter/1.3.1 darwin-arm64 node-v24.14.0
+$ heroku --help [COMMAND]
+USAGE
+  $ heroku COMMAND
+...
+```
+<!-- usagestop -->
+
+<!-- commands -->
+* [`heroku devcenter:open SLUG`](#heroku-devcenteropen-slug)
+* [`heroku devcenter:preview SLUG`](#heroku-devcenterpreview-slug)
+* [`heroku devcenter:pull SLUGORURL`](#heroku-devcenterpull-slugorurl)
+* [`heroku devcenter:push SLUG`](#heroku-devcenterpush-slug)
+
+## `heroku devcenter:open SLUG`
+
+open a published Dev Center article in your browser
+
+```
+USAGE
+  $ heroku devcenter:open SLUG [--prompt]
+
+ARGUMENTS
+  SLUG  article slug (e.g. ps for https://devcenter.heroku.com/articles/ps)
+
+GLOBAL FLAGS
+  --prompt  interactively prompt for command arguments and flags
+
+DESCRIPTION
+  open a published Dev Center article in your browser
+```
+
+_See code: [src/commands/devcenter/open.ts](https://github.com/heroku/devcenter-cli/blob/v1.3.1/src/commands/devcenter/open.ts)_
+
+## `heroku devcenter:preview SLUG`
+
+preview a local Dev Center article in the browser with live reload
+
+```
+USAGE
+  $ heroku devcenter:preview SLUG [--prompt] [--host <value>] [--port <value>]
+
+ARGUMENTS
+  SLUG  article slug (local <slug>.md file)
+
+FLAGS
+  --host=<value>  [default: 127.0.0.1] bind host for the preview server
+  --port=<value>  [default: 3000] port for the preview server
+
+GLOBAL FLAGS
+  --prompt  interactively prompt for command arguments and flags
+
+DESCRIPTION
+  preview a local Dev Center article in the browser with live reload
+```
+
+_See code: [src/commands/devcenter/preview.ts](https://github.com/heroku/devcenter-cli/blob/v1.3.1/src/commands/devcenter/preview.ts)_
+
+## `heroku devcenter:pull SLUGORURL`
+
+save a local copy of a Dev Center article
+
+```
+USAGE
+  $ heroku devcenter:pull SLUGORURL [--prompt] [--debug] [-f]
+
+ARGUMENTS
+  SLUGORURL  article slug or full Dev Center article URL
+
+FLAGS
+  -f, --force  overwrite an existing local file without prompting
+      --debug  log HTTP status and response shape for public, authenticated public, and private API article fetch
+
+GLOBAL FLAGS
+  --prompt  interactively prompt for command arguments and flags
+
+DESCRIPTION
+  save a local copy of a Dev Center article
+```
+
+_See code: [src/commands/devcenter/pull.ts](https://github.com/heroku/devcenter-cli/blob/v1.3.1/src/commands/devcenter/pull.ts)_
+
+## `heroku devcenter:push SLUG`
+
+update a Dev Center article from a local markdown file
+
+```
+USAGE
+  $ heroku devcenter:push SLUG [--prompt]
+
+ARGUMENTS
+  SLUG  article slug (optional .md suffix is ignored)
+
+GLOBAL FLAGS
+  --prompt  interactively prompt for command arguments and flags
+
+DESCRIPTION
+  update a Dev Center article from a local markdown file
+```
+
+_See code: [src/commands/devcenter/push.ts](https://github.com/heroku/devcenter-cli/blob/v1.3.1/src/commands/devcenter/push.ts)_
+<!-- commandsstop -->
+
 ### Development
 
 If you have a Dev Center instance, you can point the CLI at it with **`DEVCENTER_BASE_URL`** (e.g. `export DEVCENTER_BASE_URL=http://localhost:3000`).
 
-TypeScript lives under `src/` with tests under `test/`. With Node 22+, run **`npm install`** and **`npm test`** (then ESLint). Command tests set **`DEVCENTER_CLI_TEST=1`**, **`DEVCENTER_CLI_CWD`** where needed, and **`DEVCENTER_CLI_TEST_CONFIRM`** for pull overwrite prompts so runs stay non-interactive.
+TypeScript code lives under `src/` with tests under `test/`. With Node 22+, run `npm install` and `npm test`. Tests stub `child_process.spawn` (via sinon) so browser opens are mocked. `DEVCENTER_CLI_CWD` can override the article working directory in tests.
+
+Verbose logging uses the [`debug`](https://www.npmjs.com/package/debug) package, for example `DEBUG=devcenter:open`, `DEBUG=devcenter:preview`, or `DEBUG=devcenter:*`.
 
 ## License
 

@@ -1,6 +1,8 @@
 import type {Server} from 'node:http'
 
+import {ux} from '@oclif/core'
 import {watch} from 'chokidar'
+import createDebug from 'debug'
 import express, {type Express, type Response} from 'express'
 import {existsSync} from 'node:fs'
 import {resolve} from 'node:path'
@@ -10,7 +12,7 @@ import {ArticleFile} from './article-file.js'
 import {getArticleWorkingDirectory} from './paths.js'
 import {renderNotFoundPage, renderPreviewPage} from './preview-templates.js'
 
-export type PreviewLogger = (message: string) => void
+const dbg = createDebug('devcenter:preview')
 
 export type PreviewApp = {
   app: Express
@@ -21,7 +23,7 @@ export type PreviewApp = {
  * Express app for local Dev Center preview (routes only; no listen).
  * `broadcastReload` notifies active `/stream` SSE connections (same as file save in `runPreview`).
  */
-export function createPreviewApp(log: PreviewLogger, debugLog: PreviewLogger = () => {}): PreviewApp {
+export function createPreviewApp(): PreviewApp {
   const clients = new Set<Response>()
   const app = express()
 
@@ -46,7 +48,7 @@ export function createPreviewApp(log: PreviewLogger, debugLog: PreviewLogger = (
 
   app.get('/:articleSlug', (req, res) => {
     const {articleSlug} = req.params
-    debugLog(`Local article requested: ${articleSlug}`)
+    dbg(`Local article requested: ${articleSlug}`)
     const srcPath = resolve(getArticleWorkingDirectory(), `${articleSlug}.md`)
     if (!existsSync(srcPath)) {
       const ref = typeof req.get('Referer') === 'string' ? req.get('Referer') : undefined
@@ -54,10 +56,10 @@ export function createPreviewApp(log: PreviewLogger, debugLog: PreviewLogger = (
       return
     }
 
-    debugLog('Parsing')
+    dbg('Parsing')
     const article = ArticleFile.read(srcPath)
     const {html} = renderPreviewPage(article, articleSlug)
-    debugLog('Serving')
+    dbg('Serving')
     res.type('html').send(html)
   })
 
@@ -75,15 +77,13 @@ export function createPreviewApp(log: PreviewLogger, debugLog: PreviewLogger = (
 }
 
 export async function runPreview(options: {
-  debugLog?: PreviewLogger
   host: string
-  log: PreviewLogger
   mdPath: string
   port: number
   slug: string
 }): Promise<void> {
-  const {debugLog = () => {}, host, log, mdPath, port, slug} = options
-  const {app, broadcastReload} = createPreviewApp(log, debugLog)
+  const {host, mdPath, port, slug} = options
+  const {app, broadcastReload} = createPreviewApp()
 
   const server: Server = await new Promise(resolveListen => {
     const s = app.listen(port, host, () => {
@@ -92,24 +92,22 @@ export async function runPreview(options: {
   })
 
   const watcher = watch(mdPath, {ignoreInitial: true}).on('change', () => {
-    debugLog(`File modified: ${mdPath}`)
+    dbg(`File modified: ${mdPath}`)
     broadcastReload()
   })
 
   const url = `http://${host}:${port}/${slug}`
-  log('')
-  log(`Live preview for ${slug} available at ${url}`)
-  log(`It will refresh when you save ${mdPath}`)
-  log('Press Ctrl+C to exit...')
-  if (!process.env.DEVCENTER_CLI_TEST) {
-    await open(url)
-  }
+  ux.stdout('')
+  ux.stdout(`Live preview for ${slug} available at ${url}`)
+  ux.stdout(`It will refresh when you save ${mdPath}`)
+  ux.stdout('Press Ctrl+C to exit...')
+  await open(url)
 
   await new Promise<void>(resolveShutdown => {
     const stop = () => {
       watcher.close().then(() => {
         server.close(() => {
-          log('\nPreview finished.')
+          ux.stdout('\nPreview finished.')
           resolveShutdown()
         })
       })
