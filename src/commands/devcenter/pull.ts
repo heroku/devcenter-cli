@@ -1,6 +1,7 @@
 import {Command} from '@heroku-cli/command'
 import {confirm} from '@inquirer/prompts'
 import {Args, Flags} from '@oclif/core'
+import createDebug from 'debug'
 import {existsSync, writeFileSync} from 'node:fs'
 import {stringify as stringifyYaml} from 'yaml'
 
@@ -22,6 +23,8 @@ type ArticleJson = {
   title: string
 }
 
+const dbg = createDebug('devcenter:pull')
+
 export default class Pull extends Command {
   static args = {
     slugOrUrl: Args.string({
@@ -31,10 +34,6 @@ export default class Pull extends Command {
   }
   static description = 'save a local copy of a Dev Center article'
   static flags = {
-    debug: Flags.boolean({
-      description:
-        'log HTTP status and response shape for public, authenticated public, and private API article fetch',
-    }),
     force: Flags.boolean({
       char: 'f',
       description: 'overwrite an existing local file without prompting',
@@ -50,12 +49,6 @@ export default class Pull extends Command {
         'Please provide an article slug or full URL (e.g. ps or https://devcenter.heroku.com/articles/ps)',
         {exit: 1},
       )
-    }
-
-    const dbg = (message: string) => {
-      if (flags.debug) {
-        process.stdout.write(`devcenter: ${message}\n`)
-      }
     }
 
     const client = new DevcenterClient()

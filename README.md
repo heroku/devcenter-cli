@@ -83,14 +83,13 @@ save a local copy of a Dev Center article
 
 ```
 USAGE
-  $ heroku devcenter:pull SLUGORURL [--prompt] [--debug] [-f]
+  $ heroku devcenter:pull SLUGORURL [--prompt] [-f]
 
 ARGUMENTS
   SLUGORURL  article slug or full Dev Center article URL
 
 FLAGS
   -f, --force  overwrite an existing local file without prompting
-      --debug  log HTTP status and response shape for public, authenticated public, and private API article fetch
 
 GLOBAL FLAGS
   --prompt  interactively prompt for command arguments and flags
