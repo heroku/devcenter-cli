@@ -5,12 +5,11 @@ import {mkdtempSync, rmSync, writeFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 
-import Push from '../../src/commands/devcenter/push.js'
-import {netrcFilePath} from '../helpers/netrc-path.js'
-import {PLUGIN_ROOT} from '../helpers/plugin-root.js'
+import Push from '../../../src/commands/devcenter/push.js'
+import {netrcFilePath} from '../../helpers/netrc-path.js'
 import {
   applyHomeEnv, type HomeEnvSnapshot, setHomeDirForTests, snapshotHomeEnv,
-} from '../helpers/test-home-env.js'
+} from '../../helpers/test-home-env.js'
 
 describe('devcenter:push', function () {
   let workDir: string
@@ -72,7 +71,7 @@ Hello **world**.
         url: 'https://devcenter.heroku.com/articles/acme',
       })
 
-    const {error} = await runCommand(Push, ['acme'], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Push, ['acme'])
     expect(error).to.equal(undefined)
   })
 
@@ -95,7 +94,7 @@ id: 8
       .put('/api/v1/private/articles/8.json')
       .reply(200, {status: 'draft', title: 'B', url: 'https://devcenter.heroku.com/articles/brk'})
 
-    const {error, stdout} = await runCommand(Push, ['brk'], {root: PLUGIN_ROOT})
+    const {error, stdout} = await runCommand(Push, ['brk'])
     expect(error).to.equal(undefined)
     expect(stdout).to.contain('broken link')
   })
@@ -108,7 +107,7 @@ id: 8
       .post('/api/v1/private/articles/11/validate.json')
       .reply(200, {title: ['is invalid']})
 
-    const {error} = await runCommand(Push, ['bad'], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Push, ['bad'])
     expect(error?.message).to.contain("can't be saved")
   })
 
@@ -122,17 +121,17 @@ id: 8
       .put('/api/v1/private/articles/12.json')
       .reply(422, {error: 'rejected'})
 
-    const {error} = await runCommand(Push, ['up'], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Push, ['up'])
     expect(error?.message).to.contain('rejected')
   })
 
   it('errors when slug is empty after trimming', async function () {
-    const {error} = await runCommand(Push, ['   '], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Push, ['   '])
     expect(error?.message).to.contain('Please provide an article slug')
   })
 
   it('errors when the markdown file is missing', async function () {
-    const {error} = await runCommand(Push, ['missing'], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Push, ['missing'])
     expect(error?.message).to.contain("Can't find")
     expect(error?.message).to.contain('missing.md')
   })
@@ -143,7 +142,7 @@ id: 8
     const emptyHome = mkdtempSync(join(tmpdir(), 'devcenter-no-netrc-'))
     setHomeDirForTests(emptyHome)
     try {
-      const {error} = await runCommand(Push, ['tok'], {root: PLUGIN_ROOT})
+      const {error} = await runCommand(Push, ['tok'])
       expect(error?.message).to.contain('Heroku credentials')
     } finally {
       applyHomeEnv(noNetrcHome)
@@ -159,7 +158,7 @@ id: 8
       .post('/api/v1/private/articles/20/validate.json')
       .reply(200, [{code: 'invalid'}])
 
-    const {error} = await runCommand(Push, ['arr'], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Push, ['arr'])
     expect(error?.message).to.contain("can't be saved")
   })
 
@@ -173,7 +172,7 @@ id: 8
       .put('/api/v1/private/articles/21.json')
       .reply(418, {})
 
-    const {error} = await runCommand(Push, ['nostr'], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Push, ['nostr'])
     expect(error?.message).to.contain('418')
   })
 
@@ -191,7 +190,7 @@ id: 8
         url: 'https://devcenter.heroku.com/articles/arc',
       })
 
-    const {error, stdout} = await runCommand(Push, ['arc'], {root: PLUGIN_ROOT})
+    const {error, stdout} = await runCommand(Push, ['arc'])
     expect(error).to.equal(undefined)
     expect(stdout).to.contain('archived')
   })
@@ -210,7 +209,7 @@ id: 8
         url: 'https://devcenter.heroku.com/articles/pq',
       })
 
-    const {error, stdout} = await runCommand(Push, ['pq'], {root: PLUGIN_ROOT})
+    const {error, stdout} = await runCommand(Push, ['pq'])
     expect(error).to.equal(undefined)
     expect(stdout).to.contain('published quietly')
   })
@@ -229,7 +228,7 @@ id: 8
         url: 'https://devcenter.heroku.com/articles/st',
       })
 
-    const {error, stdout} = await runCommand(Push, ['st'], {root: PLUGIN_ROOT})
+    const {error, stdout} = await runCommand(Push, ['st'])
     expect(error).to.equal(undefined)
     expect(stdout).to.contain('staging mode')
   })
@@ -244,7 +243,7 @@ id: 8
       .put('/api/v1/private/articles/13.json')
       .reply(200, {})
 
-    const {error, stdout} = await runCommand(Push, ['min'], {root: PLUGIN_ROOT})
+    const {error, stdout} = await runCommand(Push, ['min'])
     expect(error).to.equal(undefined)
     expect(stdout).to.contain('Article update completed')
   })
