@@ -6,7 +6,6 @@ import childProcess from 'node:child_process'
 import sinon from 'sinon'
 
 import Open from '../../../src/commands/devcenter/open.js'
-import {PLUGIN_ROOT} from '../../helpers/plugin-root.js'
 import {stubOpen} from '../../helpers/stub-open.js'
 
 describe('devcenter:open', function () {
@@ -24,7 +23,7 @@ describe('devcenter:open', function () {
       .head('/articles/my-article')
       .reply(200)
 
-    const {error} = await runCommand(Open, ['my-article'], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Open, ['my-article'])
     expect(error).to.equal(undefined)
     expect((childProcess.spawn as sinon.SinonStub).called).to.equal(true)
   })
@@ -38,7 +37,7 @@ describe('devcenter:open', function () {
       .head('/articles/dbg')
       .reply(200)
 
-    const {error, stderr} = await runCommand(Open, ['dbg'], {root: PLUGIN_ROOT})
+    const {error, stderr} = await runCommand(Open, ['dbg'])
 
     if (previousDebug === undefined) {
       debug.disable()
@@ -58,7 +57,7 @@ describe('devcenter:open', function () {
       Location: 'https://devcenter.heroku.com/articles/new',
     })
 
-    const {error} = await runCommand(Open, ['old'], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Open, ['old'])
     expect(error?.message).to.contain('Redirected')
   })
 
@@ -69,18 +68,18 @@ describe('devcenter:open', function () {
       .query({query: 'missing'})
       .reply(200, {results: []})
 
-    const {error} = await runCommand(Open, ['missing'], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Open, ['missing'])
     expect(error?.message).to.contain('No missing article found')
   })
 
   it('errors when slug is empty', async function () {
-    const {error} = await runCommand(Open, ['  '], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Open, ['  '])
     expect(error?.message).to.contain('Please provide a slug')
   })
 
   it('fails on unexpected HEAD status', async function () {
     nock('https://devcenter.heroku.com').head('/articles/boom').reply(500)
-    const {error} = await runCommand(Open, ['boom'], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Open, ['boom'])
     expect(error?.message).to.contain('Unexpected response')
   })
 })

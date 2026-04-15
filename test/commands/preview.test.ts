@@ -8,7 +8,6 @@ import {join} from 'node:path'
 import sinon from 'sinon'
 
 import Preview from '../../src/commands/devcenter/preview.js'
-import {PLUGIN_ROOT} from '../helpers/plugin-root.js'
 import {stubOpen} from '../helpers/stub-open.js'
 
 describe('devcenter:preview', function () {
@@ -34,12 +33,12 @@ describe('devcenter:preview', function () {
   })
 
   it('errors when slug is empty after trimming', async function () {
-    const {error} = await runCommand(Preview, ['   '], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Preview, ['   '])
     expect(error?.message).to.contain('Please provide an article slug')
   })
 
   it('errors when the markdown file is missing', async function () {
-    const {error} = await runCommand(Preview, ['missing'], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Preview, ['missing'])
     expect(error?.message).to.contain("Can't find")
     expect(error?.message).to.contain('missing.md')
   })
@@ -55,7 +54,7 @@ content
       'utf8',
     )
 
-    const run = runCommand(Preview, ['live', '--port', '38474'], {root: PLUGIN_ROOT})
+    const run = runCommand(Preview, ['live', '--port', '38474'])
     const t = setTimeout(() => {
       process.emit('SIGINT')
     }, 300)
@@ -80,7 +79,7 @@ body
       'utf8',
     )
 
-    const run = runCommand(Preview, ['x', '--port', '38476'], {root: PLUGIN_ROOT})
+    const run = runCommand(Preview, ['x', '--port', '38476'])
     const fetchTimer = setTimeout(() => {
       fetch('http://127.0.0.1:38476/x').catch(() => {})
     }, 120)
