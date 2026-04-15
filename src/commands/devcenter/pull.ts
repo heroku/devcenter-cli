@@ -104,11 +104,8 @@ export default class Pull extends Command {
     const filePath = mdFilePath(slug)
 
     if (!flags.force && existsSync(filePath)) {
-      const ok
-        = process.env.DEVCENTER_CLI_TEST_CONFIRM === 'false'
-          ? false
-          : await confirm({message: `The file ${filePath} already exists - overwrite?`})
-      if (!ok) {
+      const shouldOverwrite = await confirm({message: `The file ${filePath} already exists - overwrite?`})
+      if (!shouldOverwrite) {
         return
       }
     }
