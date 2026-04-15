@@ -106,12 +106,6 @@
           "allowNo": false,
           "type": "boolean"
         },
-        "debug": {
-          "description": "log HTTP status and response shape for public, authenticated public, and private API article fetch",
-          "name": "debug",
-          "allowNo": false,
-          "type": "boolean"
-        },
         "force": {
           "char": "f",
           "description": "overwrite an existing local file without prompting",

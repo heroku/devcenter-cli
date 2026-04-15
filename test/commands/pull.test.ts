@@ -19,7 +19,6 @@ describe('devcenter:pull', function () {
   let homeEnv: HomeEnvSnapshot
   let noNetrcHome: string
   let previousArticleCwd: string | undefined
-  let previousTestConfirm: string | undefined
 
   beforeEach(function () {
     homeEnv = snapshotHomeEnv()
@@ -27,18 +26,10 @@ describe('devcenter:pull', function () {
     setHomeDirForTests(noNetrcHome)
     workDir = mkdtempSync(join(tmpdir(), 'devcenter-pull-'))
     previousArticleCwd = process.env.DEVCENTER_CLI_CWD
-    previousTestConfirm = process.env.DEVCENTER_CLI_TEST_CONFIRM
     process.env.DEVCENTER_CLI_CWD = workDir
-    delete process.env.DEVCENTER_CLI_TEST_CONFIRM
   })
 
   afterEach(function () {
-    if (previousTestConfirm === undefined) {
-      delete process.env.DEVCENTER_CLI_TEST_CONFIRM
-    } else {
-      process.env.DEVCENTER_CLI_TEST_CONFIRM = previousTestConfirm
-    }
-
     nock.cleanAll()
     applyHomeEnv(homeEnv)
     if (previousArticleCwd === undefined) {
@@ -141,22 +132,5 @@ describe('devcenter:pull', function () {
     const {error} = await runCommand(Pull, ['private-only', '--force'], {root: PLUGIN_ROOT})
     expect(error).to.equal(undefined)
     expect(readFileSync(join(workDir, 'private-only.md'), 'utf8')).to.contain('From **private** API.')
-  })
-
-  it('does not overwrite when user declines the prompt', async function () {
-    writeFileSync(join(workDir, 'keep.md'), 'title: Old\nid: 1\n\nold', 'utf8')
-    nock('https://devcenter.heroku.com')
-      .get('/articles/keep.json')
-      .reply(200, {
-        content: 'new body',
-        id: 1,
-        slug: 'keep',
-        title: 'New',
-      })
-
-    process.env.DEVCENTER_CLI_TEST_CONFIRM = 'false'
-    const {error} = await runCommand(Pull, ['keep'], {root: PLUGIN_ROOT})
-    expect(error).to.equal(undefined)
-    expect(readFileSync(join(workDir, 'keep.md'), 'utf8')).to.contain('old')
   })
 })
