@@ -7,12 +7,11 @@ import {
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 
-import Pull from '../../src/commands/devcenter/pull.js'
-import {netrcFilePath} from '../helpers/netrc-path.js'
-import {PLUGIN_ROOT} from '../helpers/plugin-root.js'
+import Pull from '../../../src/commands/devcenter/pull.js'
+import {netrcFilePath} from '../../helpers/netrc-path.js'
 import {
   applyHomeEnv, type HomeEnvSnapshot, setHomeDirForTests, snapshotHomeEnv,
-} from '../helpers/test-home-env.js'
+} from '../../helpers/test-home-env.js'
 
 describe('devcenter:pull', function () {
   let workDir: string
@@ -52,7 +51,7 @@ describe('devcenter:pull', function () {
         title: 'Acme Co',
       })
 
-    const {error} = await runCommand(Pull, ['acme', '--force'], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Pull, ['acme', '--force'])
     expect(error).to.equal(undefined)
 
     const written = readFileSync(join(workDir, 'acme.md'), 'utf8')
@@ -67,12 +66,12 @@ describe('devcenter:pull', function () {
       .query({query: 'nope'})
       .reply(200, {results: []})
 
-    const {error} = await runCommand(Pull, ['nope', '--force'], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Pull, ['nope', '--force'])
     expect(error?.message).to.contain('No nope article found')
   })
 
   it('errors when slug is empty after parsing', async function () {
-    const {error} = await runCommand(Pull, ['  '], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Pull, ['  '])
     expect(error?.message).to.contain('Please provide an article slug')
   })
 
@@ -99,7 +98,7 @@ describe('devcenter:pull', function () {
         title: 'Draft Title',
       })
 
-    const {error} = await runCommand(Pull, ['draftish', '--force'], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Pull, ['draftish', '--force'])
     expect(error).to.equal(undefined)
     expect(readFileSync(join(workDir, 'draftish.md'), 'utf8')).to.contain('Draft **body**.')
   })
@@ -129,7 +128,7 @@ describe('devcenter:pull', function () {
         title: 'Private Only Title',
       })
 
-    const {error} = await runCommand(Pull, ['private-only', '--force'], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Pull, ['private-only', '--force'])
     expect(error).to.equal(undefined)
     expect(readFileSync(join(workDir, 'private-only.md'), 'utf8')).to.contain('From **private** API.')
   })
