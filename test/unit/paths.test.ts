@@ -1,4 +1,5 @@
 import {expect} from 'chai'
+import {resolve} from 'node:path'
 
 import {
   articleApiPath,
@@ -86,6 +87,7 @@ describe('paths', function () {
 
   it('mdFilePath resolves to the article working directory', function () {
     process.env.DEVCENTER_CLI_CWD = '/tmp/articles'
-    expect(mdFilePath('my-article')).to.equal('/tmp/articles/my-article.md')
+    const expected = resolve('/tmp/articles', 'my-article.md')
+    expect(mdFilePath('my-article')).to.equal(expected)
   })
 })
