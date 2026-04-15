@@ -6,38 +6,25 @@ import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 
 import Push from '../../src/commands/devcenter/push.js'
-import {netrcFilePath} from '../helpers/netrc-path.js'
 import {PLUGIN_ROOT} from '../helpers/plugin-root.js'
-import {
-  applyHomeEnv, type HomeEnvSnapshot, setHomeDirForTests, snapshotHomeEnv,
-} from '../helpers/test-home-env.js'
+
+const TEST_TOKEN = 'fake-api-token-for-tests'
 
 describe('devcenter:push', function () {
   let workDir: string
-  let homeEnv: HomeEnvSnapshot
   let previousArticleCwd: string | undefined
-  let netrcHome: string
+  let previousApiKey: string | undefined
 
   beforeEach(function () {
-    homeEnv = snapshotHomeEnv()
     previousArticleCwd = process.env.DEVCENTER_CLI_CWD
+    previousApiKey = process.env.HEROKU_API_KEY
     workDir = mkdtempSync(join(tmpdir(), 'devcenter-push-'))
-    netrcHome = mkdtempSync(join(tmpdir(), 'devcenter-netrc-'))
-    setHomeDirForTests(netrcHome)
     process.env.DEVCENTER_CLI_CWD = workDir
-    writeFileSync(
-      netrcFilePath(netrcHome),
-      `machine api.heroku.com
-  login test@heroku.com
-  password fake-api-token-for-tests
-`,
-      'utf8',
-    )
+    process.env.HEROKU_API_KEY = TEST_TOKEN
   })
 
   afterEach(function () {
     nock.cleanAll()
-    applyHomeEnv(homeEnv)
 
     if (previousArticleCwd === undefined) {
       delete process.env.DEVCENTER_CLI_CWD
@@ -45,8 +32,13 @@ describe('devcenter:push', function () {
       process.env.DEVCENTER_CLI_CWD = previousArticleCwd
     }
 
+    if (previousApiKey === undefined) {
+      delete process.env.HEROKU_API_KEY
+    } else {
+      process.env.HEROKU_API_KEY = previousApiKey
+    }
+
     rmSync(workDir, {recursive: true})
-    rmSync(netrcHome, {recursive: true})
   })
 
   it('pushes article content through validate and update APIs', async function () {
@@ -135,20 +127,6 @@ id: 8
     const {error} = await runCommand(Push, ['missing'], {root: PLUGIN_ROOT})
     expect(error?.message).to.contain("Can't find")
     expect(error?.message).to.contain('missing.md')
-  })
-
-  it('errors when netrc token cannot be read', async function () {
-    writeFileSync(join(workDir, 'tok.md'), 'title: T\nid: 1\n\nx\n', 'utf8')
-    const noNetrcHome = snapshotHomeEnv()
-    const emptyHome = mkdtempSync(join(tmpdir(), 'devcenter-no-netrc-'))
-    setHomeDirForTests(emptyHome)
-    try {
-      const {error} = await runCommand(Push, ['tok'], {root: PLUGIN_ROOT})
-      expect(error?.message).to.contain('Heroku credentials')
-    } finally {
-      applyHomeEnv(noNetrcHome)
-      rmSync(emptyHome, {recursive: true})
-    }
   })
 
   it('fails when validation returns a non-empty array body', async function () {

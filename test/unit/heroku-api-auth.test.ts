@@ -1,60 +1,84 @@
 import {expect} from 'chai'
-import {mkdtempSync, rmSync, writeFileSync} from 'node:fs'
-import {tmpdir} from 'node:os'
-import {join} from 'node:path'
+import esmock from 'esmock'
 
 import {
   basicAuthHeaders,
   basicAuthHeaderValue,
-  getHerokuApiToken,
 } from '../../src/lib/heroku-api-auth.js'
-import {netrcFilePath} from '../helpers/netrc-path.js'
-import {
-  applyHomeEnv, type HomeEnvSnapshot, setHomeDirForTests, snapshotHomeEnv,
-} from '../helpers/test-home-env.js'
 
 describe('heroku-api-auth', function () {
-  let homeEnv: HomeEnvSnapshot
-  let fakeHome: string
+  let originalApiKey: string | undefined
 
   beforeEach(function () {
-    homeEnv = snapshotHomeEnv()
-    fakeHome = mkdtempSync(join(tmpdir(), 'heroku-auth-test-'))
-    setHomeDirForTests(fakeHome)
+    originalApiKey = process.env.HEROKU_API_KEY
   })
 
   afterEach(function () {
-    applyHomeEnv(homeEnv)
-    rmSync(fakeHome, {force: true, recursive: true})
+    if (originalApiKey === undefined) {
+      delete process.env.HEROKU_API_KEY
+    } else {
+      process.env.HEROKU_API_KEY = originalApiKey
+    }
   })
 
   describe('getHerokuApiToken', function () {
-    it('reads api.heroku.com password from plain netrc', function () {
-      writeFileSync(
-        netrcFilePath(fakeHome),
-        'machine api.heroku.com\n  login mail@example.com\n  password THE_TOKEN\n',
-        'utf8',
-      )
-      expect(getHerokuApiToken()).to.equal('THE_TOKEN')
+    it('returns HEROKU_API_KEY when set', async function () {
+      const {getHerokuApiToken} = await esmock('../../src/lib/heroku-api-auth.js', {
+        '@heroku-cli/command': {
+          getAuth: async () => ({account: 'test@example.com', token: 'should-not-be-used'}),
+        },
+      })
+
+      process.env.HEROKU_API_KEY = 'env-token'
+      const token = await getHerokuApiToken()
+      expect(token).to.equal('env-token')
     })
 
-    it('throws when api.heroku.com is missing', function () {
-      writeFileSync(
-        netrcFilePath(fakeHome),
-        'machine other.example\n  login x\n  password y\n',
-        'utf8',
-      )
-      expect(() => getHerokuApiToken()).to.throw(/Heroku credentials not found/)
+    it('retrieves token from credential manager when HEROKU_API_KEY is not set', async function () {
+      const {getHerokuApiToken} = await esmock('../../src/lib/heroku-api-auth.js', {
+        '@heroku-cli/command': {
+          getAuth: async () => ({account: 'user@example.com', token: 'cred-mgr-token'}),
+        },
+      })
+
+      delete process.env.HEROKU_API_KEY
+      const token = await getHerokuApiToken()
+      expect(token).to.equal('cred-mgr-token')
     })
-  })
 
-  it('getHerokuApiToken throws when netrc is missing', function () {
-    expect(() => getHerokuApiToken()).to.throw(/credentials not found|could not be loaded/i)
-  })
+    it('throws when credential manager returns no token', async function () {
+      const {getHerokuApiToken} = await esmock('../../src/lib/heroku-api-auth.js', {
+        '@heroku-cli/command': {
+          getAuth: async () => ({account: 'user@example.com', token: undefined}),
+        },
+      })
 
-  it('getHerokuApiToken throws when machine exists but password is missing', function () {
-    writeFileSync(netrcFilePath(fakeHome), 'machine api.heroku.com\n  login only\n', 'utf8')
-    expect(() => getHerokuApiToken()).to.throw(/credentials not found/i)
+      delete process.env.HEROKU_API_KEY
+      try {
+        await getHerokuApiToken()
+        expect.fail('Expected error to be thrown')
+      } catch (error) {
+        expect((error as Error).message).to.equal('No credentials found. Please log in.')
+      }
+    })
+
+    it('lets credential manager errors bubble up', async function () {
+      const {getHerokuApiToken} = await esmock('../../src/lib/heroku-api-auth.js', {
+        '@heroku-cli/command': {
+          async getAuth() {
+            throw new Error('No credentials found. Please log in.')
+          },
+        },
+      })
+
+      delete process.env.HEROKU_API_KEY
+      try {
+        await getHerokuApiToken()
+        expect.fail('Expected error to be thrown')
+      } catch (error) {
+        expect((error as Error).message).to.equal('No credentials found. Please log in.')
+      }
+    })
   })
 
   it('basicAuthHeaderValue matches legacy encoding', function () {

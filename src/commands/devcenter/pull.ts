@@ -63,10 +63,10 @@ export default class Pull extends Command {
 
     let token: string | undefined
     try {
-      token = getHerokuApiToken()
+      token = await getHerokuApiToken()
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error)
-      dbg(`Heroku ~/.netrc token unavailable: ${msg}`)
+      dbg(`Heroku token unavailable: ${msg}`)
     }
 
     if (!articleOk && token) {

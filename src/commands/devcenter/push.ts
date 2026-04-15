@@ -59,7 +59,7 @@ export default class Push extends Command {
 
     let token: string
     try {
-      token = getHerokuApiToken()
+      token = await getHerokuApiToken()
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
       this.error(message, {exit: 1})

@@ -2,44 +2,44 @@ import {runCommand} from '@heroku-cli/test-utils'
 import {expect} from 'chai'
 import nock from 'nock'
 import {
-  mkdtempSync, readFileSync, rmSync, writeFileSync,
+  mkdtempSync, readFileSync, rmSync,
 } from 'node:fs'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 
 import Pull from '../../src/commands/devcenter/pull.js'
-import {netrcFilePath} from '../helpers/netrc-path.js'
 import {PLUGIN_ROOT} from '../helpers/plugin-root.js'
-import {
-  applyHomeEnv, type HomeEnvSnapshot, setHomeDirForTests, snapshotHomeEnv,
-} from '../helpers/test-home-env.js'
+
+const TEST_TOKEN = 'fake-pull-token'
 
 describe('devcenter:pull', function () {
   let workDir: string
-  let homeEnv: HomeEnvSnapshot
-  let noNetrcHome: string
   let previousArticleCwd: string | undefined
+  let previousApiKey: string | undefined
 
   beforeEach(function () {
-    homeEnv = snapshotHomeEnv()
-    noNetrcHome = mkdtempSync(join(tmpdir(), 'devcenter-pull-home-'))
-    setHomeDirForTests(noNetrcHome)
-    workDir = mkdtempSync(join(tmpdir(), 'devcenter-pull-'))
     previousArticleCwd = process.env.DEVCENTER_CLI_CWD
+    previousApiKey = process.env.HEROKU_API_KEY
+    workDir = mkdtempSync(join(tmpdir(), 'devcenter-pull-'))
     process.env.DEVCENTER_CLI_CWD = workDir
+    delete process.env.HEROKU_API_KEY
   })
 
   afterEach(function () {
     nock.cleanAll()
-    applyHomeEnv(homeEnv)
     if (previousArticleCwd === undefined) {
       delete process.env.DEVCENTER_CLI_CWD
     } else {
       process.env.DEVCENTER_CLI_CWD = previousArticleCwd
     }
 
+    if (previousApiKey === undefined) {
+      delete process.env.HEROKU_API_KEY
+    } else {
+      process.env.HEROKU_API_KEY = previousApiKey
+    }
+
     rmSync(workDir, {recursive: true})
-    rmSync(noNetrcHome, {recursive: true})
   })
 
   it('writes a local markdown file from the Dev Center API', async function () {
@@ -61,7 +61,16 @@ describe('devcenter:pull', function () {
   })
 
   it('errors when the article cannot be loaded', async function () {
+    process.env.HEROKU_API_KEY = TEST_TOKEN
+    const auth = {authorization: `Basic ${Buffer.from(TEST_TOKEN).toString('base64')}`}
+
     nock('https://devcenter.heroku.com').get('/articles/nope.json').reply(404, {})
+    nock('https://devcenter.heroku.com', {reqheaders: auth})
+      .get('/articles/nope.json')
+      .reply(404, {})
+    nock('https://devcenter.heroku.com', {reqheaders: auth})
+      .get('/api/v1/private/articles/nope.json')
+      .reply(404, {})
     nock('https://devcenter.heroku.com')
       .get('/api/v1/search.json')
       .query({query: 'nope'})
@@ -76,20 +85,12 @@ describe('devcenter:pull', function () {
     expect(error?.message).to.contain('Please provide an article slug')
   })
 
-  it('retries with netrc auth when the public JSON request fails', async function () {
-    const token = 'fake-pull-token'
-    writeFileSync(
-      netrcFilePath(noNetrcHome),
-      `machine api.heroku.com
-  login t@t.com
-  password ${token}
-`,
-      'utf8',
-    )
+  it('retries with auth when the public JSON request fails', async function () {
+    process.env.HEROKU_API_KEY = TEST_TOKEN
 
     nock('https://devcenter.heroku.com').get('/articles/draftish.json').reply(404, {})
     nock('https://devcenter.heroku.com', {
-      reqheaders: {authorization: `Basic ${Buffer.from(token).toString('base64')}`},
+      reqheaders: {authorization: `Basic ${Buffer.from(TEST_TOKEN).toString('base64')}`},
     })
       .get('/articles/draftish.json')
       .reply(200, {
@@ -105,16 +106,8 @@ describe('devcenter:pull', function () {
   })
 
   it('falls back to private API when public JSON stays unavailable', async function () {
-    const token = 'fake-pull-token'
-    const auth = {authorization: `Basic ${Buffer.from(token).toString('base64')}`}
-    writeFileSync(
-      netrcFilePath(noNetrcHome),
-      `machine api.heroku.com
-  login t@t.com
-  password ${token}
-`,
-      'utf8',
-    )
+    process.env.HEROKU_API_KEY = TEST_TOKEN
+    const auth = {authorization: `Basic ${Buffer.from(TEST_TOKEN).toString('base64')}`}
 
     nock('https://devcenter.heroku.com').get('/articles/private-only.json').reply(401, {error: 'Authentication required'})
     nock('https://devcenter.heroku.com', {reqheaders: auth})
