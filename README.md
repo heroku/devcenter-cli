@@ -1,57 +1,101 @@
-# Dev Center CLI
+# @heroku-cli/heroku-cli-plugin-devcenter
 
-CLI to interact with Heroku's Dev Center
+Heroku CLI plugin to interact with Heroku Dev Center
+
+[![Version](https://img.shields.io/npm/v/@heroku-cli/heroku-cli-plugin-devcenter.svg)](https://npmjs.org/package/@heroku-cli/heroku-cli-plugin-devcenter)
+[![License](https://img.shields.io/npm/l/@heroku-cli/heroku-cli-plugin-devcenter.svg)](https://github.com/heroku/devcenter-cli/blob/main/LICENSE.txt)
 
 ## Installation
 
-    $ gem install devcenter
+```bash
+heroku plugins:install @heroku-cli/heroku-cli-plugin-devcenter
+```
 
-## Usage
+<!-- usage -->
+```sh-session
+$ npm install -g @heroku-cli/heroku-cli-plugin-devcenter
+$ heroku COMMAND
+running command...
+$ heroku (--version)
+@heroku-cli/heroku-cli-plugin-devcenter/1.3.1 darwin-arm64 node-v24.14.0
+$ heroku --help [COMMAND]
+USAGE
+  $ heroku COMMAND
+...
+```
+<!-- usagestop -->
 
-### Open a published article
+## Commands
 
-    $ devcenter open error-pages
+<!-- commands -->
+* [`heroku devcenter:open SLUG`](#heroku-devcenteropen-slug)
+* [`heroku devcenter:preview SLUG`](#heroku-devcenterpreview-slug)
 
-### Save a local copy of an article
+## `heroku devcenter:open SLUG`
 
-You can pull an article from its slug
+open a published Dev Center article in your browser
 
-    $ devcenter pull article-slug
+```
+USAGE
+  $ heroku devcenter:open SLUG [--prompt]
 
-or from its URL:
+ARGUMENTS
+  SLUG  article slug (e.g. ps for https://devcenter.heroku.com/articles/ps)
 
-    $ devcenter pull https://devcenter.heroku.com/articles/article-slug
+GLOBAL FLAGS
+  --prompt  interactively prompt for command arguments and flags
 
-This will save an `article-slug.md` text file in your local directory. The file includes some metadata (article title and id) followed by the article content in markdown format. You can edit both the title and the content, but **never overwrite the article id**.
+DESCRIPTION
+  open a published Dev Center article in your browser
+```
 
-### Preview a local copy of an article
+_See code: [src/commands/devcenter/open.ts](https://github.com/heroku/devcenter-cli/blob/v1.3.1/src/commands/devcenter/open.ts)_
 
-    $ devcenter preview dynos
+## `heroku devcenter:preview SLUG`
 
-This will open a preview in your default browser and get it refreshed when you save the file. You can specify `--port` and `--host` options to customize the preview web server.
+preview a local Dev Center article in the browser with live reload
 
-### Update an article in Dev Center from a local file
+```
+USAGE
+  $ heroku devcenter:preview SLUG [--prompt] [--host <value>] [--port <value>]
 
-    $ devcenter push dynos
+ARGUMENTS
+  SLUG  article slug (local <slug>.md file)
 
-This will save the title and content from your local article in Dev Center, using your Heroku credentials from `~/.netrc`, which you can set by doing `heroku auth:login`.
+FLAGS
+  --host=<value>  [default: 127.0.0.1] bind host for the preview server
+  --port=<value>  [default: 3000] port for the preview server
 
-### Help
+GLOBAL FLAGS
+  --prompt  interactively prompt for command arguments and flags
 
-Get available commands
+DESCRIPTION
+  preview a local Dev Center article in the browser with live reload
+```
 
-    $ devcenter help
+_See code: [src/commands/devcenter/preview.ts](https://github.com/heroku/devcenter-cli/blob/v1.3.1/src/commands/devcenter/preview.ts)_
+<!-- commandsstop -->
 
-Get help about a specific command
+## Development
 
-    $ devcenter help pull
+TypeScript code lives under `src/` with tests under `test/`. With Node 22+, run `npm install` and `npm test`.
 
-### Development
+If you have a Dev Center instance, you can point your CLI to it by setting the `DEVCENTER_BASE_URL` environment variable:
 
-If you have a Dev Center instance, you can point your CLI to it by setting the `DEVCENTER_BASE_URL` env. var (e.g: `export DEVCENTER_BASE_URL=http://localhost:3000`).
+```bash
+export DEVCENTER_BASE_URL=http://localhost:3000
+```
+
+Verbose logging uses the [`debug`](https://www.npmjs.com/package/debug) package:
+
+```bash
+DEBUG=devcenter:open heroku devcenter:open my-article
+DEBUG=devcenter:preview heroku devcenter:preview my-article
+DEBUG=devcenter:* heroku devcenter:open my-article
+```
 
 ## License
 
-See LICENSE.txt file.
+See [LICENSE.txt](LICENSE.txt) file.
 
 The `preview` command uses the [Font Awesome](http://fontawesome.io/) vector icons, which have their own [License](https://github.com/FortAwesome/Font-Awesome#license).
