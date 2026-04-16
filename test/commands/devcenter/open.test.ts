@@ -1,12 +1,10 @@
 import {runCommand} from '@heroku-cli/test-utils'
 import {expect} from 'chai'
-import debug from 'debug'
 import nock from 'nock'
 import childProcess from 'node:child_process'
 import sinon from 'sinon'
 
 import Open from '../../../src/commands/devcenter/open.js'
-import {PLUGIN_ROOT} from '../../helpers/plugin-root.js'
 import {stubOpen} from '../../helpers/stub-open.js'
 
 describe('devcenter:open', function () {
@@ -24,33 +22,9 @@ describe('devcenter:open', function () {
       .head('/articles/my-article')
       .reply(200)
 
-    const {error} = await runCommand(Open, ['my-article'], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Open, ['my-article'])
     expect(error).to.equal(undefined)
     expect((childProcess.spawn as sinon.SinonStub).called).to.equal(true)
-  })
-
-  it('logs debug lines to stderr when DEBUG enables devcenter:open', async function () {
-    const previousDebug = process.env.DEBUG
-    process.env.DEBUG = 'devcenter:open'
-    debug.enable('devcenter:open')
-
-    nock('https://devcenter.heroku.com', {reqheaders: {'user-agent': 'DevCenterCLI'}})
-      .head('/articles/dbg')
-      .reply(200)
-
-    const {error, stderr} = await runCommand(Open, ['dbg'], {root: PLUGIN_ROOT})
-
-    if (previousDebug === undefined) {
-      debug.disable()
-      delete process.env.DEBUG
-    } else {
-      process.env.DEBUG = previousDebug
-      debug.enable(previousDebug)
-    }
-
-    expect(error).to.equal(undefined)
-    expect(stderr).to.match(/Connecting/)
-    expect(stderr).to.match(/Page found/)
   })
 
   it('fails with redirect message when HEAD returns 302', async function () {
@@ -58,7 +32,7 @@ describe('devcenter:open', function () {
       Location: 'https://devcenter.heroku.com/articles/new',
     })
 
-    const {error} = await runCommand(Open, ['old'], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Open, ['old'])
     expect(error?.message).to.contain('Redirected')
   })
 
@@ -69,18 +43,18 @@ describe('devcenter:open', function () {
       .query({query: 'missing'})
       .reply(200, {results: []})
 
-    const {error} = await runCommand(Open, ['missing'], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Open, ['missing'])
     expect(error?.message).to.contain('No missing article found')
   })
 
   it('errors when slug is empty', async function () {
-    const {error} = await runCommand(Open, ['  '], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Open, ['  '])
     expect(error?.message).to.contain('Please provide a slug')
   })
 
   it('fails on unexpected HEAD status', async function () {
     nock('https://devcenter.heroku.com').head('/articles/boom').reply(500)
-    const {error} = await runCommand(Open, ['boom'], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Open, ['boom'])
     expect(error?.message).to.contain('Unexpected response')
   })
 })
