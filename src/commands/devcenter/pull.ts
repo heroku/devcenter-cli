@@ -1,5 +1,5 @@
 import {Command} from '@heroku-cli/command'
-import {confirm} from '@inquirer/prompts'
+import {confirm} from '@heroku/heroku-cli-util/hux'
 import {Args, Flags} from '@oclif/core'
 import createDebug from 'debug'
 import {existsSync, writeFileSync} from 'node:fs'
@@ -104,7 +104,7 @@ export default class Pull extends Command {
     const filePath = mdFilePath(slug)
 
     if (!flags.force && existsSync(filePath)) {
-      const shouldOverwrite = await confirm({message: `The file ${filePath} already exists - overwrite?`})
+      const shouldOverwrite = await confirm(`The file ${filePath} already exists - overwrite?`)
       if (!shouldOverwrite) {
         return
       }
