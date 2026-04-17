@@ -54,6 +54,7 @@
   },
   "dependencies": {
     "@heroku-cli/command": "^12.2.0",
+    "@heroku/heroku-cli-util": "^10.8.0",
     "@oclif/core": "^4.3.0",
     "@oclif/plugin-help": "^6.2.36",
     "cheerio": "^1.2.0",

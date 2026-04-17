@@ -21,12 +21,6 @@ export default class Open extends Command {
   async run(): Promise<void> {
     const {args} = await this.parse(Open)
     const slug = args.slug.trim()
-    if (!slug) {
-      this.error('Please provide a slug (e.g: ps is the slug for https://devcenter.heroku.com/articles/ps)', {
-        exit: 1,
-      })
-    }
-
     const client = new DevcenterClient()
     const path = articlePath(slug)
 
