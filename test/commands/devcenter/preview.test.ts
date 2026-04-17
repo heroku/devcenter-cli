@@ -4,7 +4,7 @@ import childProcess from 'node:child_process'
 import {mkdtempSync, rmSync, writeFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
-import sinon from 'sinon'
+import {restore, type SinonStub} from 'sinon'
 
 import Preview from '../../../src/commands/devcenter/preview.js'
 import {stubOpen} from '../../helpers/stub-open.js'
@@ -28,7 +28,7 @@ describe('devcenter:preview', function () {
     }
 
     rmSync(workDir, {recursive: true})
-    sinon.restore()
+    restore()
   })
 
   it('errors when slug is empty after trimming', async function () {
@@ -60,6 +60,6 @@ content
     const {error} = await run
     clearTimeout(t)
     expect(error).to.equal(undefined)
-    expect((childProcess.spawn as sinon.SinonStub).called).to.equal(true)
+    expect((childProcess.spawn as SinonStub).called).to.equal(true)
   })
 })

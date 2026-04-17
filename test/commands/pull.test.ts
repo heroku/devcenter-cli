@@ -8,7 +8,6 @@ import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 
 import Pull from '../../src/commands/devcenter/pull.js'
-import {PLUGIN_ROOT} from '../helpers/plugin-root.js'
 
 const TEST_TOKEN = 'fake-pull-token'
 
@@ -52,7 +51,7 @@ describe('devcenter:pull', function () {
         title: 'Acme Co',
       })
 
-    const {error} = await runCommand(Pull, ['acme', '--force'], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Pull, ['acme', '--force'])
     expect(error).to.equal(undefined)
 
     const written = readFileSync(join(workDir, 'acme.md'), 'utf8')
@@ -64,31 +63,31 @@ describe('devcenter:pull', function () {
     process.env.HEROKU_API_KEY = TEST_TOKEN
     const auth = {authorization: `Basic ${Buffer.from(TEST_TOKEN).toString('base64')}`}
 
-    nock('https://devcenter.heroku.com').get('/articles/nope.json').reply(404, {})
+    nock('https://devcenter.heroku.com').get('/articles/nope.json').reply(404)
     nock('https://devcenter.heroku.com', {reqheaders: auth})
       .get('/articles/nope.json')
-      .reply(404, {})
+      .reply(404)
     nock('https://devcenter.heroku.com', {reqheaders: auth})
       .get('/api/v1/private/articles/nope.json')
-      .reply(404, {})
+      .reply(404)
     nock('https://devcenter.heroku.com')
       .get('/api/v1/search.json')
       .query({query: 'nope'})
       .reply(200, {results: []})
 
-    const {error} = await runCommand(Pull, ['nope', '--force'], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Pull, ['nope', '--force'])
     expect(error?.message).to.contain('No nope article found')
   })
 
   it('errors when slug is empty after parsing', async function () {
-    const {error} = await runCommand(Pull, ['  '], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Pull, ['  '])
     expect(error?.message).to.contain('Please provide an article slug')
   })
 
   it('retries with auth when the public JSON request fails', async function () {
     process.env.HEROKU_API_KEY = TEST_TOKEN
 
-    nock('https://devcenter.heroku.com').get('/articles/draftish.json').reply(404, {})
+    nock('https://devcenter.heroku.com').get('/articles/draftish.json').reply(404)
     nock('https://devcenter.heroku.com', {
       reqheaders: {authorization: `Basic ${Buffer.from(TEST_TOKEN).toString('base64')}`},
     })
@@ -100,7 +99,7 @@ describe('devcenter:pull', function () {
         title: 'Draft Title',
       })
 
-    const {error} = await runCommand(Pull, ['draftish', '--force'], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Pull, ['draftish', '--force'])
     expect(error).to.equal(undefined)
     expect(readFileSync(join(workDir, 'draftish.md'), 'utf8')).to.contain('Draft **body**.')
   })
@@ -122,8 +121,24 @@ describe('devcenter:pull', function () {
         title: 'Private Only Title',
       })
 
-    const {error} = await runCommand(Pull, ['private-only', '--force'], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Pull, ['private-only', '--force'])
     expect(error).to.equal(undefined)
     expect(readFileSync(join(workDir, 'private-only.md'), 'utf8')).to.contain('From **private** API.')
+  })
+
+  it('succeeds without token when public API works', async function () {
+    delete process.env.HEROKU_API_KEY
+    nock('https://devcenter.heroku.com')
+      .get('/articles/public-art.json')
+      .reply(200, {
+        content: 'Public **content**.',
+        id: 50,
+        slug: 'public-art',
+        title: 'Public Article',
+      })
+
+    const {error} = await runCommand(Pull, ['public-art', '--force'])
+    expect(error).to.equal(undefined)
+    expect(readFileSync(join(workDir, 'public-art.md'), 'utf8')).to.contain('Public **content**.')
   })
 })

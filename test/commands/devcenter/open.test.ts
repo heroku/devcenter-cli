@@ -2,7 +2,7 @@ import {runCommand} from '@heroku-cli/test-utils'
 import {expect} from 'chai'
 import nock from 'nock'
 import childProcess from 'node:child_process'
-import sinon from 'sinon'
+import {restore, type SinonStub} from 'sinon'
 
 import Open from '../../../src/commands/devcenter/open.js'
 import {stubOpen} from '../../helpers/stub-open.js'
@@ -14,7 +14,7 @@ describe('devcenter:open', function () {
 
   afterEach(function () {
     nock.cleanAll()
-    sinon.restore()
+    restore()
   })
 
   it('succeeds when HEAD succeeds and opens browser', async function () {
@@ -24,7 +24,7 @@ describe('devcenter:open', function () {
 
     const {error} = await runCommand(Open, ['my-article'])
     expect(error).to.equal(undefined)
-    expect((childProcess.spawn as sinon.SinonStub).called).to.equal(true)
+    expect((childProcess.spawn as SinonStub).called).to.equal(true)
   })
 
   it('fails with redirect message when HEAD returns 302', async function () {

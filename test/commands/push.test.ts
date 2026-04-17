@@ -6,7 +6,6 @@ import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 
 import Push from '../../src/commands/devcenter/push.js'
-import {PLUGIN_ROOT} from '../helpers/plugin-root.js'
 
 const TEST_TOKEN = 'fake-api-token-for-tests'
 
@@ -56,7 +55,7 @@ Hello **world**.
       .post('/api/v1/private/broken-link-checks.json')
       .reply(200, [])
       .post('/api/v1/private/articles/7/validate.json')
-      .reply(200, {})
+      .reply(200)
       .put('/api/v1/private/articles/7.json')
       .reply(200, {
         status: 'published',
@@ -64,7 +63,7 @@ Hello **world**.
         url: 'https://devcenter.heroku.com/articles/acme',
       })
 
-    const {error} = await runCommand(Push, ['acme'], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Push, ['acme'])
     expect(error).to.equal(undefined)
   })
 
@@ -83,11 +82,11 @@ id: 8
       .post('/api/v1/private/broken-link-checks.json')
       .reply(200, [{text: 'link', url: 'http://broken'}])
       .post('/api/v1/private/articles/8/validate.json')
-      .reply(200, {})
+      .reply(200)
       .put('/api/v1/private/articles/8.json')
       .reply(200, {status: 'draft', title: 'B', url: 'https://devcenter.heroku.com/articles/brk'})
 
-    const {error, stdout} = await runCommand(Push, ['brk'], {root: PLUGIN_ROOT})
+    const {error, stdout} = await runCommand(Push, ['brk'])
     expect(error).to.equal(undefined)
     expect(stdout).to.contain('broken link')
   })
@@ -100,7 +99,7 @@ id: 8
       .post('/api/v1/private/articles/11/validate.json')
       .reply(200, {title: ['is invalid']})
 
-    const {error} = await runCommand(Push, ['bad'], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Push, ['bad'])
     expect(error?.message).to.contain("can't be saved")
   })
 
@@ -110,23 +109,29 @@ id: 8
       .post('/api/v1/private/broken-link-checks.json')
       .reply(200, [])
       .post('/api/v1/private/articles/12/validate.json')
-      .reply(200, {})
+      .reply(200)
       .put('/api/v1/private/articles/12.json')
       .reply(422, {error: 'rejected'})
 
-    const {error} = await runCommand(Push, ['up'], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Push, ['up'])
     expect(error?.message).to.contain('rejected')
   })
 
   it('errors when slug is empty after trimming', async function () {
-    const {error} = await runCommand(Push, ['   '], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Push, ['   '])
     expect(error?.message).to.contain('Please provide an article slug')
   })
 
   it('errors when the markdown file is missing', async function () {
-    const {error} = await runCommand(Push, ['missing'], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Push, ['missing'])
     expect(error?.message).to.contain("Can't find")
     expect(error?.message).to.contain('missing.md')
+  })
+
+  it('errors when the markdown file has no YAML separator', async function () {
+    writeFileSync(join(workDir, 'bad-format.md'), 'no yaml separator here just text', 'utf8')
+    const {error} = await runCommand(Push, ['bad-format'])
+    expect(error?.message).to.contain('Invalid article file')
   })
 
   it('fails when validation returns a non-empty array body', async function () {
@@ -137,7 +142,7 @@ id: 8
       .post('/api/v1/private/articles/20/validate.json')
       .reply(200, [{code: 'invalid'}])
 
-    const {error} = await runCommand(Push, ['arr'], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Push, ['arr'])
     expect(error?.message).to.contain("can't be saved")
   })
 
@@ -147,11 +152,11 @@ id: 8
       .post('/api/v1/private/broken-link-checks.json')
       .reply(200, [])
       .post('/api/v1/private/articles/21/validate.json')
-      .reply(200, {})
+      .reply(200)
       .put('/api/v1/private/articles/21.json')
-      .reply(418, {})
+      .reply(418)
 
-    const {error} = await runCommand(Push, ['nostr'], {root: PLUGIN_ROOT})
+    const {error} = await runCommand(Push, ['nostr'])
     expect(error?.message).to.contain('418')
   })
 
@@ -161,7 +166,7 @@ id: 8
       .post('/api/v1/private/broken-link-checks.json')
       .reply(200, [])
       .post('/api/v1/private/articles/22/validate.json')
-      .reply(200, {})
+      .reply(200)
       .put('/api/v1/private/articles/22.json')
       .reply(200, {
         status: 'archived',
@@ -169,7 +174,7 @@ id: 8
         url: 'https://devcenter.heroku.com/articles/arc',
       })
 
-    const {error, stdout} = await runCommand(Push, ['arc'], {root: PLUGIN_ROOT})
+    const {error, stdout} = await runCommand(Push, ['arc'])
     expect(error).to.equal(undefined)
     expect(stdout).to.contain('archived')
   })
@@ -180,7 +185,7 @@ id: 8
       .post('/api/v1/private/broken-link-checks.json')
       .reply(200, [])
       .post('/api/v1/private/articles/23/validate.json')
-      .reply(200, {})
+      .reply(200)
       .put('/api/v1/private/articles/23.json')
       .reply(200, {
         status: 'published_quietly',
@@ -188,7 +193,7 @@ id: 8
         url: 'https://devcenter.heroku.com/articles/pq',
       })
 
-    const {error, stdout} = await runCommand(Push, ['pq'], {root: PLUGIN_ROOT})
+    const {error, stdout} = await runCommand(Push, ['pq'])
     expect(error).to.equal(undefined)
     expect(stdout).to.contain('published quietly')
   })
@@ -199,7 +204,7 @@ id: 8
       .post('/api/v1/private/broken-link-checks.json')
       .reply(200, [])
       .post('/api/v1/private/articles/24/validate.json')
-      .reply(200, {})
+      .reply(200)
       .put('/api/v1/private/articles/24.json')
       .reply(200, {
         status: 'staging',
@@ -207,7 +212,7 @@ id: 8
         url: 'https://devcenter.heroku.com/articles/st',
       })
 
-    const {error, stdout} = await runCommand(Push, ['st'], {root: PLUGIN_ROOT})
+    const {error, stdout} = await runCommand(Push, ['st'])
     expect(error).to.equal(undefined)
     expect(stdout).to.contain('staging mode')
   })
@@ -218,11 +223,11 @@ id: 8
       .post('/api/v1/private/broken-link-checks.json')
       .reply(200, [])
       .post('/api/v1/private/articles/13/validate.json')
-      .reply(200, {})
+      .reply(200)
       .put('/api/v1/private/articles/13.json')
-      .reply(200, {})
+      .reply(200)
 
-    const {error, stdout} = await runCommand(Push, ['min'], {root: PLUGIN_ROOT})
+    const {error, stdout} = await runCommand(Push, ['min'])
     expect(error).to.equal(undefined)
     expect(stdout).to.contain('Article update completed')
   })

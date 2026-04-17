@@ -53,6 +53,12 @@ Issues labelled `good first contribution`.
 - [x] Reviews
   - Changes must be approved via peer code review
 
+# Package Overrides
+
+The `overrides` section in `package.json` pins transitive dependencies to address known vulnerabilities:
+
+- **mocha → serialize-javascript**: Pinned to `^7.0.5` to address a security vulnerability in older versions. This override can be removed when mocha v12+ is released with the fix included.
+
 # Creating a Pull Request
 
 1. **Ensure the bug/feature was not already reported** by searching on GitHub under Issues.  If none exists, create a new issue so that other contributors can keep track of what you are trying to add/fix and offer suggestions (or let you know if there is already an effort in progress).
