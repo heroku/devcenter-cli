@@ -1,5 +1,5 @@
 import {Command} from '@heroku-cli/command'
-import {confirm} from '@inquirer/prompts'
+import {confirm} from '@heroku/heroku-cli-util/hux'
 import {Args, Flags} from '@oclif/core'
 import createDebug from 'debug'
 import {existsSync, writeFileSync} from 'node:fs'
@@ -44,13 +44,6 @@ export default class Pull extends Command {
     const {args, flags} = await this.parse(Pull)
     const raw = args.slugOrUrl.trim()
     const slug = slugFromArticleUrl(raw).trim()
-    if (!slug) {
-      this.error(
-        'Please provide an article slug or full URL (e.g. ps or https://devcenter.heroku.com/articles/ps)',
-        {exit: 1},
-      )
-    }
-
     const client = new DevcenterClient()
     const path = articleApiPath(slug)
     dbg(`baseUrl=${getDevcenterBaseUrl()} path=${path} expectedSlug=${slug}`)
@@ -104,7 +97,7 @@ export default class Pull extends Command {
     const filePath = mdFilePath(slug)
 
     if (!flags.force && existsSync(filePath)) {
-      const shouldOverwrite = await confirm({message: `The file ${filePath} already exists - overwrite?`})
+      const shouldOverwrite = await confirm(`The file ${filePath} already exists - overwrite?`)
       if (!shouldOverwrite) {
         return
       }

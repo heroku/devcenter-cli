@@ -6,7 +6,7 @@ import {
 } from 'node:fs'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
-import sinon from 'sinon'
+import {restore, type SinonStub} from 'sinon'
 import request from 'supertest'
 
 import {createPreviewApp, runPreview} from '../../src/lib/preview-server.js'
@@ -30,7 +30,7 @@ describe('createPreviewApp', function () {
     }
 
     rmSync(workDir, {recursive: true})
-    sinon.restore()
+    restore()
   })
 
   it('returns 200 and article HTML when the markdown file exists', async function () {
@@ -145,6 +145,6 @@ content
     debug.log = origLog
 
     expect(lines.some(l => l.includes('File modified'))).to.equal(true)
-    expect((childProcess.spawn as sinon.SinonStub).called).to.equal(true)
+    expect((childProcess.spawn as SinonStub).called).to.equal(true)
   })
 })

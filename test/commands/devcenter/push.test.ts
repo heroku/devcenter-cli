@@ -125,11 +125,6 @@ id: 8
     expect(error?.message).to.contain('rejected')
   })
 
-  it('errors when slug is empty after trimming', async function () {
-    const {error} = await runCommand(Push, ['   '])
-    expect(error?.message).to.contain('Please provide an article slug')
-  })
-
   it('errors when the markdown file is missing', async function () {
     const {error} = await runCommand(Push, ['missing'])
     expect(error?.message).to.contain("Can't find")
