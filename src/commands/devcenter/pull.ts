@@ -44,13 +44,6 @@ export default class Pull extends Command {
     const {args, flags} = await this.parse(Pull)
     const raw = args.slugOrUrl.trim()
     const slug = slugFromArticleUrl(raw).trim()
-    if (!slug) {
-      this.error(
-        'Please provide an article slug or full URL (e.g. ps or https://devcenter.heroku.com/articles/ps)',
-        {exit: 1},
-      )
-    }
-
     const client = new DevcenterClient()
     const path = articleApiPath(slug)
     dbg(`baseUrl=${getDevcenterBaseUrl()} path=${path} expectedSlug=${slug}`)

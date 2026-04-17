@@ -70,11 +70,6 @@ describe('devcenter:pull', function () {
     expect(error?.message).to.contain('No nope article found')
   })
 
-  it('errors when slug is empty after parsing', async function () {
-    const {error} = await runCommand(Pull, ['  '])
-    expect(error?.message).to.contain('Please provide an article slug')
-  })
-
   it('retries with netrc auth when the public JSON request fails', async function () {
     const token = 'fake-pull-token'
     writeFileSync(

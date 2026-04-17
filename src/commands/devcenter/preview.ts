@@ -28,10 +28,6 @@ export default class Preview extends Command {
   async run(): Promise<void> {
     const {args, flags} = await this.parse(Preview)
     const slug = args.slug.replace(/\.md$/i, '').trim()
-    if (!slug) {
-      this.error('Please provide an article slug', {exit: 1})
-    }
-
     const mdPath = mdFilePath(slug)
     if (!existsSync(mdPath)) {
       this.error(`Can't find ${mdPath} file - you may want to \`heroku devcenter:pull ${slug}\``, {exit: 1})
