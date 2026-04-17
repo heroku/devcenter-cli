@@ -1,9 +1,12 @@
 import {Command} from '@heroku-cli/command'
 import {Args} from '@oclif/core'
+import createDebug from 'debug'
 import {existsSync} from 'node:fs'
 import {stringify as stringifyYaml} from 'yaml'
 
 import {ArticleFile} from '../../lib/article-file.js'
+
+const dbg = createDebug('devcenter:push')
 import {DevcenterClient} from '../../lib/devcenter-client.js'
 import {getHerokuApiToken} from '../../lib/heroku-api-auth.js'
 import {mdFilePath} from '../../lib/paths.js'
@@ -43,10 +46,6 @@ export default class Push extends Command {
   async run(): Promise<void> {
     const {args} = await this.parse(Push)
     const slug = args.slug.replace(/\.md$/i, '').trim()
-    if (!slug) {
-      this.error('Please provide an article slug', {exit: 1})
-    }
-
     const mdPath = mdFilePath(slug)
     if (!existsSync(mdPath)) {
       this.error(`Can't find ${mdPath} file - you may want to \`heroku devcenter:pull ${slug}\``, {exit: 1})
@@ -71,7 +70,10 @@ export default class Push extends Command {
       'article[title]': String(article.metadata.title),
     }
 
+    dbg(`Pushing article id=${article.metadata.id} title="${article.metadata.title}"`)
+
     const broken = await client.checkBrokenLinks(token, article.content)
+    dbg(`Broken link check: ${Array.isArray(broken.body) ? broken.body.length : 0} issues`)
     const links = broken.body
     if (Array.isArray(links) && links.length > 0) {
       this.log(`The article "${slug}" contains broken link/s:`)
@@ -83,12 +85,14 @@ export default class Push extends Command {
     }
 
     const validated = await client.validateArticle(token, article.metadata.id, formParams)
+    dbg(`Validation response: status=${validated.status} ok=${validated.ok}`)
     if (hasValidationErrors(validated.body)) {
       const dumped = stringifyYaml(validated.body)
       this.error(`The article "${slug}" can't be saved:\n${dumped}`, {exit: 1})
     }
 
     const updated = await client.updateArticle(token, article.metadata.id, formParams)
+    dbg(`Update response: status=${updated.status} ok=${updated.ok}`)
     if (!updated.ok) {
       const errBody = updated.body as {error?: string}
       this.error(`Error pushing "${slug}": ${errBody.error ?? updated.status}`, {exit: 1})

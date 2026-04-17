@@ -55,8 +55,8 @@
     "version": "oclif readme --multi && git add README.md docs"
   },
   "dependencies": {
-    "@heroku-cli/command": "^13.0.0-beta.1",
-    "@inquirer/prompts": "^8.4.1",
+    "@heroku-cli/command": "^12.2.0",
+    "@heroku/heroku-cli-util": "^10.8.0",
     "@oclif/core": "^4.3.0",
     "@oclif/plugin-help": "^6.2.36",
     "cheerio": "^1.2.0",
@@ -65,6 +65,7 @@
     "express": "^5.2.1",
     "markdown-it": "^14.1.1",
     "markdown-it-anchor": "^9.2.0",
+    "netrc-parser": "3.1.6",
     "open": "^11.0.0",
     "yaml": "^2.8.3"
   },
@@ -88,7 +89,6 @@
     "eslint": "^9.39.4",
     "eslint-config-oclif": "^6.0.156",
     "eslint-plugin-mocha": "^11.2.0",
-    "esmock": "^2.7.3",
     "mocha": "^11.7.5",
     "nock": "^14.0.12",
     "oclif": "^4.22.81",

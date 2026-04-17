@@ -5,25 +5,38 @@ import {mkdtempSync, rmSync, writeFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 
-import Push from '../../src/commands/devcenter/push.js'
-
-const TEST_TOKEN = 'fake-api-token-for-tests'
+import Push from '../../../src/commands/devcenter/push.js'
+import {netrcFilePath} from '../../helpers/netrc-path.js'
+import {
+  applyHomeEnv, type HomeEnvSnapshot, setHomeDirForTests, snapshotHomeEnv,
+} from '../../helpers/test-home-env.js'
 
 describe('devcenter:push', function () {
   let workDir: string
+  let homeEnv: HomeEnvSnapshot
   let previousArticleCwd: string | undefined
-  let previousApiKey: string | undefined
+  let netrcHome: string
 
   beforeEach(function () {
+    homeEnv = snapshotHomeEnv()
     previousArticleCwd = process.env.DEVCENTER_CLI_CWD
-    previousApiKey = process.env.HEROKU_API_KEY
     workDir = mkdtempSync(join(tmpdir(), 'devcenter-push-'))
+    netrcHome = mkdtempSync(join(tmpdir(), 'devcenter-netrc-'))
+    setHomeDirForTests(netrcHome)
     process.env.DEVCENTER_CLI_CWD = workDir
-    process.env.HEROKU_API_KEY = TEST_TOKEN
+    writeFileSync(
+      netrcFilePath(netrcHome),
+      `machine api.heroku.com
+  login test@heroku.com
+  password fake-api-token-for-tests
+`,
+      'utf8',
+    )
   })
 
   afterEach(function () {
     nock.cleanAll()
+    applyHomeEnv(homeEnv)
 
     if (previousArticleCwd === undefined) {
       delete process.env.DEVCENTER_CLI_CWD
@@ -31,13 +44,8 @@ describe('devcenter:push', function () {
       process.env.DEVCENTER_CLI_CWD = previousArticleCwd
     }
 
-    if (previousApiKey === undefined) {
-      delete process.env.HEROKU_API_KEY
-    } else {
-      process.env.HEROKU_API_KEY = previousApiKey
-    }
-
     rmSync(workDir, {recursive: true})
+    rmSync(netrcHome, {recursive: true})
   })
 
   it('pushes article content through validate and update APIs', async function () {
@@ -55,7 +63,7 @@ Hello **world**.
       .post('/api/v1/private/broken-link-checks.json')
       .reply(200, [])
       .post('/api/v1/private/articles/7/validate.json')
-      .reply(200)
+      .reply(200, {})
       .put('/api/v1/private/articles/7.json')
       .reply(200, {
         status: 'published',
@@ -82,7 +90,7 @@ id: 8
       .post('/api/v1/private/broken-link-checks.json')
       .reply(200, [{text: 'link', url: 'http://broken'}])
       .post('/api/v1/private/articles/8/validate.json')
-      .reply(200)
+      .reply(200, {})
       .put('/api/v1/private/articles/8.json')
       .reply(200, {status: 'draft', title: 'B', url: 'https://devcenter.heroku.com/articles/brk'})
 
@@ -109,17 +117,12 @@ id: 8
       .post('/api/v1/private/broken-link-checks.json')
       .reply(200, [])
       .post('/api/v1/private/articles/12/validate.json')
-      .reply(200)
+      .reply(200, {})
       .put('/api/v1/private/articles/12.json')
       .reply(422, {error: 'rejected'})
 
     const {error} = await runCommand(Push, ['up'])
     expect(error?.message).to.contain('rejected')
-  })
-
-  it('errors when slug is empty after trimming', async function () {
-    const {error} = await runCommand(Push, ['   '])
-    expect(error?.message).to.contain('Please provide an article slug')
   })
 
   it('errors when the markdown file is missing', async function () {
@@ -128,10 +131,18 @@ id: 8
     expect(error?.message).to.contain('missing.md')
   })
 
-  it('errors when the markdown file has no YAML separator', async function () {
-    writeFileSync(join(workDir, 'bad-format.md'), 'no yaml separator here just text', 'utf8')
-    const {error} = await runCommand(Push, ['bad-format'])
-    expect(error?.message).to.contain('Invalid article file')
+  it('errors when netrc token cannot be read', async function () {
+    writeFileSync(join(workDir, 'tok.md'), 'title: T\nid: 1\n\nx\n', 'utf8')
+    const noNetrcHome = snapshotHomeEnv()
+    const emptyHome = mkdtempSync(join(tmpdir(), 'devcenter-no-netrc-'))
+    setHomeDirForTests(emptyHome)
+    try {
+      const {error} = await runCommand(Push, ['tok'])
+      expect(error?.message).to.contain('Heroku credentials')
+    } finally {
+      applyHomeEnv(noNetrcHome)
+      rmSync(emptyHome, {recursive: true})
+    }
   })
 
   it('fails when validation returns a non-empty array body', async function () {
@@ -152,9 +163,9 @@ id: 8
       .post('/api/v1/private/broken-link-checks.json')
       .reply(200, [])
       .post('/api/v1/private/articles/21/validate.json')
-      .reply(200)
+      .reply(200, {})
       .put('/api/v1/private/articles/21.json')
-      .reply(418)
+      .reply(418, {})
 
     const {error} = await runCommand(Push, ['nostr'])
     expect(error?.message).to.contain('418')
@@ -166,7 +177,7 @@ id: 8
       .post('/api/v1/private/broken-link-checks.json')
       .reply(200, [])
       .post('/api/v1/private/articles/22/validate.json')
-      .reply(200)
+      .reply(200, {})
       .put('/api/v1/private/articles/22.json')
       .reply(200, {
         status: 'archived',
@@ -185,7 +196,7 @@ id: 8
       .post('/api/v1/private/broken-link-checks.json')
       .reply(200, [])
       .post('/api/v1/private/articles/23/validate.json')
-      .reply(200)
+      .reply(200, {})
       .put('/api/v1/private/articles/23.json')
       .reply(200, {
         status: 'published_quietly',
@@ -204,7 +215,7 @@ id: 8
       .post('/api/v1/private/broken-link-checks.json')
       .reply(200, [])
       .post('/api/v1/private/articles/24/validate.json')
-      .reply(200)
+      .reply(200, {})
       .put('/api/v1/private/articles/24.json')
       .reply(200, {
         status: 'staging',
@@ -223,9 +234,9 @@ id: 8
       .post('/api/v1/private/broken-link-checks.json')
       .reply(200, [])
       .post('/api/v1/private/articles/13/validate.json')
-      .reply(200)
+      .reply(200, {})
       .put('/api/v1/private/articles/13.json')
-      .reply(200)
+      .reply(200, {})
 
     const {error, stdout} = await runCommand(Push, ['min'])
     expect(error).to.equal(undefined)

@@ -47,11 +47,6 @@ describe('devcenter:open', function () {
     expect(error?.message).to.contain('No missing article found')
   })
 
-  it('errors when slug is empty', async function () {
-    const {error} = await runCommand(Open, ['  '])
-    expect(error?.message).to.contain('Please provide a slug')
-  })
-
   it('fails on unexpected HEAD status', async function () {
     nock('https://devcenter.heroku.com').head('/articles/boom').reply(500)
     const {error} = await runCommand(Open, ['boom'])

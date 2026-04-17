@@ -1,19 +1,21 @@
-import {getAuth} from '@heroku-cli/command'
-
-const API_HOST = 'api.heroku.com'
+import {Netrc} from 'netrc-parser'
 
 /**
- * Retrieves Heroku API token via the credential manager.
- * Precedence: HEROKU_API_KEY env var → native keychain → netrc fallback.
+ * Heroku API token for `api.heroku.com` from netrc, same resolution as the Heroku CLI
+ * (`netrc-parser`: plain `~/.netrc` or `~/.netrc.gpg` when present, decrypted via `gpg`).
  */
-export async function getHerokuApiToken(): Promise<string> {
-  if (process.env.HEROKU_API_KEY) {
-    return process.env.HEROKU_API_KEY
+export function getHerokuApiToken(): string {
+  const netrc = new Netrc()
+  try {
+    netrc.loadSync()
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    throw new Error(`Heroku credentials could not be loaded: ${message}`)
   }
 
-  const {token} = await getAuth(undefined, API_HOST)
+  const token = netrc.machines['api.heroku.com']?.password
   if (!token) {
-    throw new Error('No credentials found. Please log in.')
+    throw new Error('Heroku credentials not found. Run `heroku login`.')
   }
 
   return token

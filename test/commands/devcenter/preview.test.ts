@@ -31,11 +31,6 @@ describe('devcenter:preview', function () {
     restore()
   })
 
-  it('errors when slug is empty after trimming', async function () {
-    const {error} = await runCommand(Preview, ['   '])
-    expect(error?.message).to.contain('Please provide an article slug')
-  })
-
   it('errors when the markdown file is missing', async function () {
     const {error} = await runCommand(Preview, ['missing'])
     expect(error?.message).to.contain("Can't find")

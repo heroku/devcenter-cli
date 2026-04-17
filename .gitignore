@@ -1,11 +1,6 @@
 node_modules/
 dist/
-<<<<<<< HEAD
 coverage/
 *.tsbuildinfo
 .DS_Store
 oclif.manifest.json
-=======
-*.tsbuildinfo
-oclif.manifest.json
->>>>>>> origin/feat/ruby-to-typescript

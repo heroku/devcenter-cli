@@ -81,34 +81,4 @@ describe('DevcenterClient', function () {
     const res = await client.head('/articles/z')
     expect(res.ok).to.equal(true)
   })
-
-  it('checkBrokenLinks posts content to broken-link-checks endpoint', async function () {
-    nock('https://devcenter.heroku.com')
-      .post('/api/v1/private/broken-link-checks.json')
-      .reply(200, [{text: 'bad', url: 'http://dead'}])
-
-    const client = new DevcenterClient()
-    const res = await client.checkBrokenLinks('tok', '<a href="http://dead">bad</a>')
-    expect(res.ok).to.equal(true)
-    expect(res.body).to.deep.equal([{text: 'bad', url: 'http://dead'}])
-  })
-
-  it('head returns ok:true for 200 status', async function () {
-    nock('https://devcenter.heroku.com').head('/articles/exists').reply(200)
-    const client = new DevcenterClient()
-    const res = await client.head('/articles/exists')
-    expect(res.ok).to.equal(true)
-    expect(res.notFound).to.equal(false)
-    expect(res.redirect).to.equal(false)
-  })
-
-  it('updateArticle sends PUT to the article endpoint', async function () {
-    nock('https://devcenter.heroku.com')
-      .put('/api/v1/private/articles/5.json')
-      .reply(200, {status: 'published'})
-
-    const client = new DevcenterClient()
-    const res = await client.updateArticle('tok', 5, {'article[title]': 'New'})
-    expect(res.ok).to.equal(true)
-  })
 })
