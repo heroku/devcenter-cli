@@ -72,19 +72,19 @@ export default class Pull extends Command {
       logArticleJsonFetch(dbg, {
         expectedSlug: slug, label: 'authenticated public', path, res: authed,
       })
-    }
 
-    if (!articleOk && token) {
-      const privatePath = privateArticleShowPath(slug)
-      dbg(`retrying GET private API ${privatePath}`)
-      const priv = await client.getJson<ArticleJson>(privatePath, undefined, {token})
-      body = priv.body
-      ok = priv.ok
-      status = priv.status
-      articleOk = ok && body?.slug === slug
-      logArticleJsonFetch(dbg, {
-        expectedSlug: slug, label: 'private API', path: privatePath, res: priv,
-      })
+      if (!articleOk) {
+        const privatePath = privateArticleShowPath(slug)
+        dbg(`retrying GET private API ${privatePath}`)
+        const priv = await client.getJson<ArticleJson>(privatePath, undefined, {token})
+        body = priv.body
+        ok = priv.ok
+        status = priv.status
+        articleOk = ok && body?.slug === slug
+        logArticleJsonFetch(dbg, {
+          expectedSlug: slug, label: 'private API', path: privatePath, res: priv,
+        })
+      }
     }
 
     if (!articleOk) {
