@@ -11,8 +11,8 @@
   ],
   "include": ["src/**/*.ts"],
   "reporter": ["text-summary", "lcov"],
-  "statements": 77,
+  "statements": 80,
   "branches": 80,
   "functions": 80,
-  "lines": 77
+  "lines": 80
 }
