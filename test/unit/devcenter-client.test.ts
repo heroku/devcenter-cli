@@ -42,7 +42,7 @@ describe('DevcenterClient', function () {
     expect((res.body as {slug?: string}).slug).to.equal('z')
   })
 
-  it('getJson parses query params and tolerates invalid JSON body', async function () {
+  it('getJson parses query params and rejects non-empty non-JSON body', async function () {
     nock('https://devcenter.heroku.com')
       .get('/articles/x.json')
       .query({foo: 'bar'})
@@ -50,6 +50,16 @@ describe('DevcenterClient', function () {
 
     const client = new DevcenterClient()
     const res = await client.getJson('/articles/x.json', {foo: 'bar'})
+    expect(res.ok).to.equal(false)
+    expect(res.status).to.equal(200)
+    expect(res.body).to.deep.equal({})
+  })
+
+  it('getJson treats whitespace-only body as empty object', async function () {
+    nock('https://devcenter.heroku.com').get('/articles/empty.json').query({}).reply(200, '  \n  ')
+
+    const client = new DevcenterClient()
+    const res = await client.getJson('/articles/empty.json')
     expect(res.ok).to.equal(true)
     expect(res.body).to.deep.equal({})
   })

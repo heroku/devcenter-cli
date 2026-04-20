@@ -5,11 +5,11 @@ import {existsSync} from 'node:fs'
 import {stringify as stringifyYaml} from 'yaml'
 
 import {ArticleFile} from '../../lib/article-file.js'
-
-const dbg = createDebug('devcenter:push')
 import {DevcenterClient} from '../../lib/devcenter-client.js'
 import {getHerokuApiToken} from '../../lib/heroku-api-auth.js'
 import {mdFilePath} from '../../lib/paths.js'
+
+const dbg = createDebug('devcenter:push')
 
 function hasValidationErrors(body: unknown): boolean {
   if (body === undefined || body === null) {
