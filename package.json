@@ -1,5 +1,5 @@
 {
-  "name": "@heroku-cli/heroku-cli-plugin-devcenter",
+  "name": "@heroku-cli/plugin-devcenter",
   "description": "Heroku CLI plugin to interact with Heroku Dev Center",
   "version": "1.3.1",
   "author": "Heroku",
@@ -50,9 +50,9 @@
     "prepare": "npm run build",
     "posttest": "npm run lint",
     "pretest": "npm run build",
-    "readme": "oclif readme --multi",
+    "readme": "oclif readme",
     "test": "c8 --all --check-coverage --reporter=lcov --reporter=text-summary mocha --forbid-only \"test/**/*.test.ts\"",
-    "version": "oclif readme --multi && git add README.md docs"
+    "version": "oclif readme && git add README.md"
   },
   "dependencies": {
     "@heroku-cli/command": "^12.2.0",
