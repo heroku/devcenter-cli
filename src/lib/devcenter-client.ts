@@ -110,11 +110,17 @@ export class DevcenterClient {
     }
 
     const res = await nodeRequest('GET', u.toString(), {headers})
+    const raw = res.body ?? ''
+    const trimmed = raw.trim()
     let parsed: T
-    try {
-      parsed = JSON.parse(res.body || '{}') as T
-    } catch {
+    if (trimmed === '') {
       parsed = {} as T
+    } else {
+      try {
+        parsed = JSON.parse(raw) as T
+      } catch {
+        return {body: {} as T, ok: false, status: res.statusCode}
+      }
     }
 
     return {body: parsed, ok: res.statusCode >= 200 && res.statusCode < 300, status: res.statusCode}
