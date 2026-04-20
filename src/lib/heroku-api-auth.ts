@@ -1,27 +1,7 @@
-import {Netrc} from 'netrc-parser'
-
 /**
- * Heroku API token for `api.heroku.com` from netrc, same resolution as the Heroku CLI
- * (`netrc-parser`: plain `~/.netrc` or `~/.netrc.gpg` when present, decrypted via `gpg`).
+ * Dev Center private endpoints expect HTTP Basic auth: base64(raw API token), not Bearer.
+ * The token itself is resolved by `@heroku-cli/command` (`APIClient.getAuth()` / credential manager).
  */
-export function getHerokuApiToken(): string {
-  const netrc = new Netrc()
-  try {
-    netrc.loadSync()
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error)
-    throw new Error(`Heroku credentials could not be loaded: ${message}`)
-  }
-
-  const token = netrc.machines['api.heroku.com']?.password
-  if (!token) {
-    throw new Error('Heroku credentials not found. Run `heroku login`.')
-  }
-
-  return token
-}
-
-/** `Authorization` header value Dev Center private APIs expect (matches legacy CLI behavior). */
 export function basicAuthHeaderValue(token: string): string {
   const encoded = Buffer.from(token).toString('base64')
   return `Basic ${encoded}`

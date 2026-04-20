@@ -6,7 +6,6 @@ import {stringify as stringifyYaml} from 'yaml'
 
 import {ArticleFile} from '../../lib/article-file.js'
 import {DevcenterClient} from '../../lib/devcenter-client.js'
-import {getHerokuApiToken} from '../../lib/heroku-api-auth.js'
 import {mdFilePath} from '../../lib/paths.js'
 
 const dbg = createDebug('devcenter:push')
@@ -56,12 +55,9 @@ export default class Push extends Command {
       this.error(`The content of ${mdPath} can't be parsed properly, fix it and try again.`, {exit: 1})
     }
 
-    let token: string
-    try {
-      token = await getHerokuApiToken()
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error)
-      this.error(message, {exit: 1})
+    const token = await this.heroku.getAuth()
+    if (!token) {
+      this.error('Heroku credentials not found. Run `heroku login`.', {exit: 1})
     }
 
     const client = new DevcenterClient()

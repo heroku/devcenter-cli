@@ -1,14 +1,11 @@
 import {runCommand} from '@heroku-cli/test-utils'
 import {expect} from 'chai'
 import nock from 'nock'
-import {
-  mkdtempSync, readFileSync, rmSync, writeFileSync,
-} from 'node:fs'
+import {mkdtempSync, readFileSync, rmSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 
 import Pull from '../../../src/commands/devcenter/pull.js'
-import {netrcFilePath} from '../../helpers/netrc-path.js'
 import {
   applyHomeEnv, type HomeEnvSnapshot, setHomeDirForTests, snapshotHomeEnv,
 } from '../../helpers/test-home-env.js'
@@ -16,13 +13,13 @@ import {
 describe('devcenter:pull', function () {
   let workDir: string
   let homeEnv: HomeEnvSnapshot
-  let noNetrcHome: string
+  let isolatedHome: string
   let previousArticleCwd: string | undefined
 
   beforeEach(function () {
     homeEnv = snapshotHomeEnv()
-    noNetrcHome = mkdtempSync(join(tmpdir(), 'devcenter-pull-home-'))
-    setHomeDirForTests(noNetrcHome)
+    isolatedHome = mkdtempSync(join(tmpdir(), 'devcenter-pull-home-'))
+    setHomeDirForTests(isolatedHome)
     workDir = mkdtempSync(join(tmpdir(), 'devcenter-pull-'))
     previousArticleCwd = process.env.DEVCENTER_CLI_CWD
     process.env.DEVCENTER_CLI_CWD = workDir
@@ -38,7 +35,7 @@ describe('devcenter:pull', function () {
     }
 
     rmSync(workDir, {recursive: true})
-    rmSync(noNetrcHome, {recursive: true})
+    rmSync(isolatedHome, {recursive: true})
   })
 
   it('writes a local markdown file from the Dev Center API', async function () {
@@ -70,61 +67,63 @@ describe('devcenter:pull', function () {
     expect(error?.message).to.contain('No nope article found')
   })
 
-  it('retries with netrc auth when the public JSON request fails', async function () {
+  it('retries with Heroku credentials when the public JSON request fails', async function () {
     const token = 'fake-pull-token'
-    writeFileSync(
-      netrcFilePath(noNetrcHome),
-      `machine api.heroku.com
-  login t@t.com
-  password ${token}
-`,
-      'utf8',
-    )
-
-    nock('https://devcenter.heroku.com').get('/articles/draftish.json').reply(404, {})
-    nock('https://devcenter.heroku.com', {
-      reqheaders: {authorization: `Basic ${Buffer.from(token).toString('base64')}`},
-    })
-      .get('/articles/draftish.json')
-      .reply(200, {
-        content: 'Draft **body**.',
-        id: 99,
-        slug: 'draftish',
-        title: 'Draft Title',
+    const savedKey = process.env.HEROKU_API_KEY
+    process.env.HEROKU_API_KEY = token
+    try {
+      nock('https://devcenter.heroku.com').get('/articles/draftish.json').reply(404, {})
+      nock('https://devcenter.heroku.com', {
+        reqheaders: {authorization: `Basic ${Buffer.from(token).toString('base64')}`},
       })
+        .get('/articles/draftish.json')
+        .reply(200, {
+          content: 'Draft **body**.',
+          id: 99,
+          slug: 'draftish',
+          title: 'Draft Title',
+        })
 
-    const {error} = await runCommand(Pull, ['draftish', '--force'])
-    expect(error).to.equal(undefined)
-    expect(readFileSync(join(workDir, 'draftish.md'), 'utf8')).to.contain('Draft **body**.')
+      const {error} = await runCommand(Pull, ['draftish', '--force'])
+      expect(error).to.equal(undefined)
+      expect(readFileSync(join(workDir, 'draftish.md'), 'utf8')).to.contain('Draft **body**.')
+    } finally {
+      if (savedKey === undefined) {
+        delete process.env.HEROKU_API_KEY
+      } else {
+        process.env.HEROKU_API_KEY = savedKey
+      }
+    }
   })
 
   it('falls back to private API when public JSON stays unavailable', async function () {
     const token = 'fake-pull-token'
+    const savedKey = process.env.HEROKU_API_KEY
+    process.env.HEROKU_API_KEY = token
     const auth = {authorization: `Basic ${Buffer.from(token).toString('base64')}`}
-    writeFileSync(
-      netrcFilePath(noNetrcHome),
-      `machine api.heroku.com
-  login t@t.com
-  password ${token}
-`,
-      'utf8',
-    )
+    try {
+      nock('https://devcenter.heroku.com').get('/articles/private-only.json').reply(401, {error: 'Authentication required'})
+      nock('https://devcenter.heroku.com', {reqheaders: auth})
+        .get('/articles/private-only.json')
+        .reply(401, {error: 'Authentication required'})
+      nock('https://devcenter.heroku.com', {reqheaders: auth})
+        .get('/api/v1/private/articles/private-only.json')
+        .reply(200, {
+          content: 'From **private** API.',
+          id: 42,
+          slug: 'private-only',
+          title: 'Private Only Title',
+        })
 
-    nock('https://devcenter.heroku.com').get('/articles/private-only.json').reply(401, {error: 'Authentication required'})
-    nock('https://devcenter.heroku.com', {reqheaders: auth})
-      .get('/articles/private-only.json')
-      .reply(401, {error: 'Authentication required'})
-    nock('https://devcenter.heroku.com', {reqheaders: auth})
-      .get('/api/v1/private/articles/private-only.json')
-      .reply(200, {
-        content: 'From **private** API.',
-        id: 42,
-        slug: 'private-only',
-        title: 'Private Only Title',
-      })
-
-    const {error} = await runCommand(Pull, ['private-only', '--force'])
-    expect(error).to.equal(undefined)
-    expect(readFileSync(join(workDir, 'private-only.md'), 'utf8')).to.contain('From **private** API.')
+      const {error} = await runCommand(Pull, ['private-only', '--force'])
+      expect(error).to.equal(undefined)
+      expect(readFileSync(join(workDir, 'private-only.md'), 'utf8')).to.contain('From **private** API.')
+    } finally {
+      if (savedKey === undefined) {
+        delete process.env.HEROKU_API_KEY
+      } else {
+        process.env.HEROKU_API_KEY = savedKey
+      }
+    }
   })
 })

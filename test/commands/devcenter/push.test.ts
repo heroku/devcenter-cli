@@ -6,7 +6,6 @@ import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 
 import Push from '../../../src/commands/devcenter/push.js'
-import {netrcFilePath} from '../../helpers/netrc-path.js'
 import {
   applyHomeEnv, type HomeEnvSnapshot, setHomeDirForTests, snapshotHomeEnv,
 } from '../../helpers/test-home-env.js'
@@ -15,28 +14,29 @@ describe('devcenter:push', function () {
   let workDir: string
   let homeEnv: HomeEnvSnapshot
   let previousArticleCwd: string | undefined
-  let netrcHome: string
+  let isolatedHome: string
+  let savedHerokuApiKey: string | undefined
 
   beforeEach(function () {
     homeEnv = snapshotHomeEnv()
+    savedHerokuApiKey = process.env.HEROKU_API_KEY
+    process.env.HEROKU_API_KEY = 'fake-api-token-for-tests'
     previousArticleCwd = process.env.DEVCENTER_CLI_CWD
     workDir = mkdtempSync(join(tmpdir(), 'devcenter-push-'))
-    netrcHome = mkdtempSync(join(tmpdir(), 'devcenter-netrc-'))
-    setHomeDirForTests(netrcHome)
+    isolatedHome = mkdtempSync(join(tmpdir(), 'devcenter-push-home-'))
+    setHomeDirForTests(isolatedHome)
     process.env.DEVCENTER_CLI_CWD = workDir
-    writeFileSync(
-      netrcFilePath(netrcHome),
-      `machine api.heroku.com
-  login test@heroku.com
-  password fake-api-token-for-tests
-`,
-      'utf8',
-    )
   })
 
   afterEach(function () {
     nock.cleanAll()
     applyHomeEnv(homeEnv)
+
+    if (savedHerokuApiKey === undefined) {
+      delete process.env.HEROKU_API_KEY
+    } else {
+      process.env.HEROKU_API_KEY = savedHerokuApiKey
+    }
 
     if (previousArticleCwd === undefined) {
       delete process.env.DEVCENTER_CLI_CWD
@@ -45,7 +45,7 @@ describe('devcenter:push', function () {
     }
 
     rmSync(workDir, {recursive: true})
-    rmSync(netrcHome, {recursive: true})
+    rmSync(isolatedHome, {recursive: true})
   })
 
   it('pushes article content through validate and update APIs', async function () {
@@ -131,16 +131,24 @@ id: 8
     expect(error?.message).to.contain('missing.md')
   })
 
-  it('errors when netrc token cannot be read', async function () {
+  it('errors when Heroku credentials are not available', async function () {
     writeFileSync(join(workDir, 'tok.md'), 'title: T\nid: 1\n\nx\n', 'utf8')
-    const noNetrcHome = snapshotHomeEnv()
-    const emptyHome = mkdtempSync(join(tmpdir(), 'devcenter-no-netrc-'))
+    const homeSnap = snapshotHomeEnv()
+    const savedKey = process.env.HEROKU_API_KEY
+    delete process.env.HEROKU_API_KEY
+    const emptyHome = mkdtempSync(join(tmpdir(), 'devcenter-no-creds-'))
     setHomeDirForTests(emptyHome)
     try {
       const {error} = await runCommand(Push, ['tok'])
       expect(error?.message).to.contain('Heroku credentials')
     } finally {
-      applyHomeEnv(noNetrcHome)
+      applyHomeEnv(homeSnap)
+      if (savedKey === undefined) {
+        delete process.env.HEROKU_API_KEY
+      } else {
+        process.env.HEROKU_API_KEY = savedKey
+      }
+
       rmSync(emptyHome, {recursive: true})
     }
   })
