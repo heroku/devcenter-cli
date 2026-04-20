@@ -35,7 +35,7 @@ USAGE
 
 ## `heroku devcenter:open SLUG`
 
-open a published Dev Center article in your browser
+open a Dev Center article in the browser (uses Heroku credentials for private or draft content when available)
 
 ```
 USAGE
@@ -48,7 +48,7 @@ GLOBAL FLAGS
   --prompt  interactively prompt for command arguments and flags
 
 DESCRIPTION
-  open a published Dev Center article in your browser
+  open a Dev Center article in the browser (uses Heroku credentials for private or draft content when available)
 ```
 
 _See code: [src/commands/devcenter/open.ts](https://github.com/heroku/devcenter-cli/blob/v1.3.1/src/commands/devcenter/open.ts)_

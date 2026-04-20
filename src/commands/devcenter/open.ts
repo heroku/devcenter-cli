@@ -4,6 +4,7 @@ import createDebug from 'debug'
 import open from 'open'
 
 import {formatArticleNotFoundMessage} from '../../lib/article-not-found.js'
+import {fetchArticleJsonForSlug} from '../../lib/article-resolve.js'
 import {DevcenterClient} from '../../lib/devcenter-client.js'
 import {articlePath, getDevcenterBaseUrl} from '../../lib/paths.js'
 
@@ -16,26 +17,24 @@ export default class Open extends Command {
       required: true,
     }),
   }
-  static description = 'open a published Dev Center article in your browser'
+  static description
+    = 'open a Dev Center article in the browser (uses Heroku credentials for private or draft content when available)'
 
   async run(): Promise<void> {
     const {args} = await this.parse(Open)
     const slug = args.slug.trim()
     const client = new DevcenterClient()
-    const path = articlePath(slug)
 
-    dbg(`Connecting to ${path}`)
-    const res = await client.head(path)
-    if (res.ok) {
-      dbg('Page found, opening')
-      await open(`${getDevcenterBaseUrl()}${path}`)
-    } else if (res.redirect) {
-      this.error(`Redirected to ${res.location ?? 'unknown'}`, {exit: 1})
-    } else if (res.notFound) {
+    dbg(`baseUrl=${getDevcenterBaseUrl()} path=${articlePath(slug)} expectedSlug=${slug}`)
+
+    const token = await this.heroku.getAuth()
+    const article = await fetchArticleJsonForSlug(client, slug, token, dbg)
+    if (!article) {
       const msg = await formatArticleNotFoundMessage(client, slug)
       this.error(msg, {exit: 1})
-    } else {
-      this.error(`Unexpected response for ${path}`, {exit: 1})
     }
+
+    dbg('Article found, opening')
+    await open(`${getDevcenterBaseUrl()}${articlePath(slug)}`)
   }
 }
