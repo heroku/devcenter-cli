@@ -3,26 +3,28 @@ import {mkdtempSync, rmSync, writeFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 
-import {basicAuthHeaderValue, getHerokuApiToken} from '../../src/lib/heroku-api-auth.js'
+import {
+  basicAuthHeaders,
+  basicAuthHeaderValue,
+  getHerokuApiToken,
+} from '../../src/lib/heroku-api-auth.js'
 import {netrcFilePath} from '../helpers/netrc-path.js'
+import {
+  applyHomeEnv, type HomeEnvSnapshot, setHomeDirForTests, snapshotHomeEnv,
+} from '../helpers/test-home-env.js'
 
 describe('heroku-api-auth', function () {
+  let homeEnv: HomeEnvSnapshot
   let fakeHome: string
-  let previousHome: string | undefined
 
   beforeEach(function () {
-    fakeHome = mkdtempSync(join(tmpdir(), 'devcenter-netrc-'))
-    previousHome = process.env.HOME
-    process.env.HOME = fakeHome
+    homeEnv = snapshotHomeEnv()
+    fakeHome = mkdtempSync(join(tmpdir(), 'heroku-auth-test-'))
+    setHomeDirForTests(fakeHome)
   })
 
   afterEach(function () {
-    if (previousHome === undefined) {
-      delete process.env.HOME
-    } else {
-      process.env.HOME = previousHome
-    }
-
+    applyHomeEnv(homeEnv)
     rmSync(fakeHome, {force: true, recursive: true})
   })
 
@@ -46,9 +48,22 @@ describe('heroku-api-auth', function () {
     })
   })
 
-  describe('basicAuthHeaderValue', function () {
-    it('encodes token as Basic with empty user', function () {
-      expect(basicAuthHeaderValue('abc')).to.equal(`Basic ${Buffer.from('abc').toString('base64')}`)
+  it('getHerokuApiToken throws when netrc is missing', function () {
+    expect(() => getHerokuApiToken()).to.throw(/credentials not found|could not be loaded/i)
+  })
+
+  it('getHerokuApiToken throws when machine exists but password is missing', function () {
+    writeFileSync(netrcFilePath(fakeHome), 'machine api.heroku.com\n  login only\n', 'utf8')
+    expect(() => getHerokuApiToken()).to.throw(/credentials not found/i)
+  })
+
+  it('basicAuthHeaderValue matches legacy encoding', function () {
+    expect(basicAuthHeaderValue('tok')).to.equal(`Basic ${Buffer.from('tok').toString('base64')}`)
+  })
+
+  it('basicAuthHeaders sets Authorization', function () {
+    expect(basicAuthHeaders('x')).to.deep.equal({
+      Authorization: basicAuthHeaderValue('x'),
     })
   })
 })

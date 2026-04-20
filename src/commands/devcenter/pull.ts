@@ -128,13 +128,9 @@ function logArticleJsonFetch(
   dbg(`slugMatch=${String(body?.slug === expectedSlug)} (want ${JSON.stringify(expectedSlug)})`)
   if (body && typeof body === 'object') {
     dbg(`response keys: ${Object.keys(body as object).sort().join(', ')}`)
-    dbg('response body (full JSON):')
-    try {
-      for (const line of JSON.stringify(body, undefined, 2).split('\n')) {
-        dbg(`  ${line}`)
-      }
-    } catch {
-      dbg(`  (could not stringify body: ${String(body)})`)
+    if ('content' in body) {
+      const c = (body as ArticleJson).content
+      dbg(`content: ${typeof c === 'string' ? `${c.length} chars` : String(c)}`)
     }
   }
 }

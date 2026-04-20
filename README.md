@@ -1,23 +1,23 @@
-# @heroku-cli/heroku-cli-plugin-devcenter
+# @heroku-cli/plugin-devcenter
 
 Heroku CLI plugin to interact with Heroku Dev Center
 
-[![Version](https://img.shields.io/npm/v/@heroku-cli/heroku-cli-plugin-devcenter.svg)](https://npmjs.org/package/@heroku-cli/heroku-cli-plugin-devcenter)
-[![License](https://img.shields.io/npm/l/@heroku-cli/heroku-cli-plugin-devcenter.svg)](https://github.com/heroku/devcenter-cli/blob/main/LICENSE.txt)
+[![Version](https://img.shields.io/npm/v/@heroku-cli/plugin-devcenter.svg)](https://npmjs.org/package/@heroku-cli/plugin-devcenter)
+[![License](https://img.shields.io/npm/l/@heroku-cli/plugin-devcenter.svg)](https://github.com/heroku/devcenter-cli/blob/main/LICENSE.txt)
 
 ## Installation
 
 ```bash
-heroku plugins:install @heroku-cli/heroku-cli-plugin-devcenter
+heroku plugins:install @heroku-cli/plugin-devcenter
 ```
 
 <!-- usage -->
 ```sh-session
-$ npm install -g @heroku-cli/heroku-cli-plugin-devcenter
+$ npm install -g @heroku-cli/plugin-devcenter
 $ heroku COMMAND
 running command...
 $ heroku (--version)
-@heroku-cli/heroku-cli-plugin-devcenter/1.3.1 darwin-arm64 node-v24.14.0
+@heroku-cli/plugin-devcenter/1.3.1 darwin-arm64 node-v24.14.0
 $ heroku --help [COMMAND]
 USAGE
   $ heroku COMMAND
