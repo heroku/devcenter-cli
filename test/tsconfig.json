@@ -1,0 +1,9 @@
+{
+  "declaration": false,
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "sourceMap": true
+  },
+  "include": ["./**/*", "../src/**/*"]
+}
