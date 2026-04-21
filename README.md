@@ -17,7 +17,7 @@ $ npm install -g @heroku-cli/plugin-devcenter
 $ heroku COMMAND
 running command...
 $ heroku (--version)
-@heroku-cli/plugin-devcenter/1.3.1 darwin-arm64 node-v24.14.0
+@heroku-cli/plugin-devcenter/2.0.0 darwin-arm64 node-v24.14.0
 $ heroku --help [COMMAND]
 USAGE
   $ heroku COMMAND
@@ -51,7 +51,7 @@ DESCRIPTION
   open a Dev Center article in the browser (uses Heroku credentials for private or draft content when available)
 ```
 
-_See code: [src/commands/devcenter/open.ts](https://github.com/heroku/devcenter-cli/blob/v1.3.1/src/commands/devcenter/open.ts)_
+_See code: [src/commands/devcenter/open.ts](https://github.com/heroku/devcenter-cli/blob/v2.0.0/src/commands/devcenter/open.ts)_
 
 ## `heroku devcenter:preview SLUG`
 
@@ -75,7 +75,7 @@ DESCRIPTION
   preview a local Dev Center article in the browser with live reload
 ```
 
-_See code: [src/commands/devcenter/preview.ts](https://github.com/heroku/devcenter-cli/blob/v1.3.1/src/commands/devcenter/preview.ts)_
+_See code: [src/commands/devcenter/preview.ts](https://github.com/heroku/devcenter-cli/blob/v2.0.0/src/commands/devcenter/preview.ts)_
 
 ## `heroku devcenter:pull SLUGORURL`
 
@@ -98,7 +98,7 @@ DESCRIPTION
   save a local copy of a Dev Center article
 ```
 
-_See code: [src/commands/devcenter/pull.ts](https://github.com/heroku/devcenter-cli/blob/v1.3.1/src/commands/devcenter/pull.ts)_
+_See code: [src/commands/devcenter/pull.ts](https://github.com/heroku/devcenter-cli/blob/v2.0.0/src/commands/devcenter/pull.ts)_
 
 ## `heroku devcenter:push SLUG`
 
@@ -118,7 +118,7 @@ DESCRIPTION
   update a Dev Center article from a local markdown file
 ```
 
-_See code: [src/commands/devcenter/push.ts](https://github.com/heroku/devcenter-cli/blob/v1.3.1/src/commands/devcenter/push.ts)_
+_See code: [src/commands/devcenter/push.ts](https://github.com/heroku/devcenter-cli/blob/v2.0.0/src/commands/devcenter/push.ts)_
 <!-- commandsstop -->
 
 ## Development
