@@ -9,7 +9,7 @@ updates:
       day: "sunday"
       timezone: "America/Los_Angeles"
     commit-message:
-      prefix: "deps"
+      prefix: "deps(dev)"
   - package-ecosystem: "npm"
     directory: "/"
     open-pull-requests-limit: 5
@@ -19,9 +19,8 @@ updates:
       day: "sunday"
       timezone: "America/Los_Angeles"
     commit-message:
-      prefix: "fix"
-      prefix-development: "chore"
-      include: "scope"
+      prefix: "deps"
+      prefix-development: "deps(dev)"
     groups:
       dev-patch-minor-dependencies:
         dependency-type: "development"

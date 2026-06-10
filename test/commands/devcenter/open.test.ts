@@ -1,11 +1,13 @@
 import {runCommand} from '@heroku-cli/test-utils'
-import {expect} from 'chai'
 import nock from 'nock'
 import childProcess from 'node:child_process'
 import {mkdtempSync, rmSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 import {restore, type SinonStub} from 'sinon'
+import {
+  afterEach, beforeEach, describe, expect, it,
+} from 'vitest'
 
 import Open from '../../../src/commands/devcenter/open.js'
 import {stubOpen} from '../../helpers/stub-open.js'
@@ -13,25 +15,25 @@ import {
   applyHomeEnv, type HomeEnvSnapshot, setHomeDirForTests, snapshotHomeEnv,
 } from '../../helpers/test-home-env.js'
 
-describe('devcenter:open', function () {
+describe('devcenter:open', () => {
   let homeEnv: HomeEnvSnapshot
   let isolatedHome: string
 
-  beforeEach(function () {
+  beforeEach(() => {
     stubOpen()
     homeEnv = snapshotHomeEnv()
     isolatedHome = mkdtempSync(join(tmpdir(), 'devcenter-open-home-'))
     setHomeDirForTests(isolatedHome)
   })
 
-  afterEach(function () {
+  afterEach(() => {
     nock.cleanAll()
     restore()
     applyHomeEnv(homeEnv)
     rmSync(isolatedHome, {recursive: true})
   })
 
-  it('succeeds when public article JSON matches and opens browser', async function () {
+  it('succeeds when public article JSON matches and opens browser', async () => {
     nock('https://devcenter.heroku.com')
       .get('/articles/my-article.json')
       .reply(200, {
@@ -42,11 +44,11 @@ describe('devcenter:open', function () {
       })
 
     const {error} = await runCommand(Open, ['my-article'])
-    expect(error).to.equal(undefined)
-    expect((childProcess.spawn as SinonStub).called).to.equal(true)
+    expect(error).toBeUndefined()
+    expect((childProcess.spawn as SinonStub).called).toBe(true)
   })
 
-  it('opens when authenticated public JSON succeeds after anonymous miss', async function () {
+  it('opens when authenticated public JSON succeeds after anonymous miss', async () => {
     const token = 'fake-open-token'
     const savedKey = process.env.HEROKU_API_KEY
     process.env.HEROKU_API_KEY = token
@@ -64,8 +66,8 @@ describe('devcenter:open', function () {
         })
 
       const {error} = await runCommand(Open, ['draftish'])
-      expect(error).to.equal(undefined)
-      expect((childProcess.spawn as SinonStub).called).to.equal(true)
+      expect(error).toBeUndefined()
+      expect((childProcess.spawn as SinonStub).called).toBe(true)
     } finally {
       if (savedKey === undefined) {
         delete process.env.HEROKU_API_KEY
@@ -75,7 +77,7 @@ describe('devcenter:open', function () {
     }
   })
 
-  it('opens when private API resolves the article after public failures', async function () {
+  it('opens when private API resolves the article after public failures', async () => {
     const token = 'fake-open-token'
     const savedKey = process.env.HEROKU_API_KEY
     process.env.HEROKU_API_KEY = token
@@ -95,8 +97,8 @@ describe('devcenter:open', function () {
         })
 
       const {error} = await runCommand(Open, ['private-only'])
-      expect(error).to.equal(undefined)
-      expect((childProcess.spawn as SinonStub).called).to.equal(true)
+      expect(error).toBeUndefined()
+      expect((childProcess.spawn as SinonStub).called).toBe(true)
     } finally {
       if (savedKey === undefined) {
         delete process.env.HEROKU_API_KEY
@@ -106,7 +108,7 @@ describe('devcenter:open', function () {
     }
   })
 
-  it('fails with not-found hints when article cannot be resolved', async function () {
+  it('fails with not-found hints when article cannot be resolved', async () => {
     const savedKey = process.env.HEROKU_API_KEY
     delete process.env.HEROKU_API_KEY
     try {
@@ -117,7 +119,7 @@ describe('devcenter:open', function () {
         .reply(200, {results: []})
 
       const {error} = await runCommand(Open, ['missing'])
-      expect(error?.message).to.contain('No missing article found')
+      expect(error?.message).toContain('No missing article found')
     } finally {
       if (savedKey === undefined) {
         delete process.env.HEROKU_API_KEY

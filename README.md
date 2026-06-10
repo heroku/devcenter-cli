@@ -17,7 +17,7 @@ $ npm install -g @heroku-cli/plugin-devcenter
 $ heroku COMMAND
 running command...
 $ heroku (--version)
-@heroku-cli/plugin-devcenter/2.0.0 darwin-arm64 node-v24.14.0
+@heroku-cli/plugin-devcenter/2.0.0 darwin-arm64 node-v22.22.2
 $ heroku --help [COMMAND]
 USAGE
   $ heroku COMMAND

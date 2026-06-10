@@ -1,4 +1,3 @@
-import {expect} from 'chai'
 import debug from 'debug'
 import childProcess from 'node:child_process'
 import {
@@ -8,21 +7,24 @@ import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 import {restore, type SinonStub} from 'sinon'
 import request from 'supertest'
+import {
+  afterEach, beforeEach, describe, expect, it,
+} from 'vitest'
 
 import {createPreviewApp, runPreview} from '../../src/lib/preview-server.js'
 import {stubOpen} from '../helpers/stub-open.js'
 
-describe('createPreviewApp', function () {
+describe('createPreviewApp', () => {
   let workDir: string
   let previousArticleCwd: string | undefined
 
-  beforeEach(function () {
+  beforeEach(() => {
     workDir = mkdtempSync(join(tmpdir(), 'devcenter-preview-'))
     previousArticleCwd = process.env.DEVCENTER_CLI_CWD
     process.env.DEVCENTER_CLI_CWD = workDir
   })
 
-  afterEach(function () {
+  afterEach(() => {
     if (previousArticleCwd === undefined) {
       delete process.env.DEVCENTER_CLI_CWD
     } else {
@@ -33,7 +35,7 @@ describe('createPreviewApp', function () {
     restore()
   })
 
-  it('returns 200 and article HTML when the markdown file exists', async function () {
+  it('returns 200 and article HTML when the markdown file exists', async () => {
     writeFileSync(
       join(workDir, 'hello.md'),
       `title: Hello Title
@@ -46,17 +48,17 @@ id: 1
 
     const {app} = createPreviewApp()
     const res = await request(app).get('/hello').expect(200)
-    expect(res.text).to.contain('Hello Title')
-    expect(res.text).to.contain('Section')
+    expect(res.text).toContain('Hello Title')
+    expect(res.text).toContain('Section')
   })
 
-  it('returns 404 HTML when the markdown file is missing', async function () {
+  it('returns 404 HTML when the markdown file is missing', async () => {
     const {app} = createPreviewApp()
     const res = await request(app).get('/missing').expect(404)
-    expect(res.text).to.contain('Ooops')
+    expect(res.text).toContain('Ooops')
   })
 
-  it('routes verbose request logs through debug when enabled', async function () {
+  it('routes verbose request logs through debug when enabled', async () => {
     writeFileSync(
       join(workDir, 'trace.md'),
       `title: T
@@ -82,17 +84,19 @@ x
       debug.log = origLog
     }
 
-    expect(lines.some(l => l.includes('Local article requested'))).to.equal(true)
-    expect(lines.some(l => l.includes('Parsing'))).to.equal(true)
-    expect(lines.some(l => l.includes('Serving'))).to.equal(true)
+    expect(lines.some(l => l.includes('Local article requested'))).toBe(true)
+    expect(lines.some(l => l.includes('Parsing'))).toBe(true)
+    expect(lines.some(l => l.includes('Serving'))).toBe(true)
   })
 
-  it('returns 204 for favicon', async function () {
+  // eslint-disable-next-line vitest/expect-expect
+  it('returns 204 for favicon', async () => {
     const {app} = createPreviewApp()
     await request(app).get('/favicon.ico').expect(204)
   })
 
-  it('opens an SSE stream then aborts cleanly', async function () {
+  // eslint-disable-next-line vitest/expect-expect
+  it('opens an SSE stream then aborts cleanly', async () => {
     const {app} = createPreviewApp()
     await new Promise<void>(resolve => {
       const r = request(app).get('/stream').end(() => {
@@ -105,7 +109,7 @@ x
     })
   })
 
-  it('runPreview listens, opens browser, and exits when SIGINT is emitted', async function () {
+  it('runPreview listens, opens browser, and exits when SIGINT is emitted', async () => {
     stubOpen()
 
     const mdPath = join(workDir, 'live.md')
@@ -144,7 +148,7 @@ content
     debug.disable()
     debug.log = origLog
 
-    expect(lines.some(l => l.includes('File modified'))).to.equal(true)
-    expect((childProcess.spawn as SinonStub).called).to.equal(true)
+    expect(lines.some(l => l.includes('File modified'))).toBe(true)
+    expect((childProcess.spawn as SinonStub).called).toBe(true)
   })
 })

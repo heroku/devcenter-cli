@@ -1,15 +1,17 @@
-import {expect} from 'chai'
 import nock from 'nock'
+import {
+  afterEach, describe, expect, it,
+} from 'vitest'
 
 import {formatArticleNotFoundMessage} from '../../src/lib/article-not-found.js'
 import {DevcenterClient} from '../../src/lib/devcenter-client.js'
 
-describe('formatArticleNotFoundMessage', function () {
-  afterEach(function () {
+describe('formatArticleNotFoundMessage', () => {
+  afterEach(() => {
     nock.cleanAll()
   })
 
-  it('includes search suggestions for devcenter article URLs', async function () {
+  it('includes search suggestions for devcenter article URLs', async () => {
     nock('https://devcenter.heroku.com')
       .get('/api/v1/search.json')
       .query({query: 'foo'})
@@ -26,13 +28,13 @@ describe('formatArticleNotFoundMessage', function () {
 
     const client = new DevcenterClient()
     const msg = await formatArticleNotFoundMessage(client, 'foo')
-    expect(msg).to.contain('No foo article found.')
-    expect(msg).to.contain('Perhaps you meant one of these:')
-    expect(msg).to.contain('foo-bar')
-    expect(msg).to.contain('Foo Bar Title')
+    expect(msg).toContain('No foo article found.')
+    expect(msg).toContain('Perhaps you meant one of these:')
+    expect(msg).toContain('foo-bar')
+    expect(msg).toContain('Foo Bar Title')
   })
 
-  it('ignores search hits that are not devcenter article URLs', async function () {
+  it('ignores search hits that are not devcenter article URLs', async () => {
     nock('https://devcenter.heroku.com')
       .get('/api/v1/search.json')
       .query({query: 'x'})
@@ -49,7 +51,7 @@ describe('formatArticleNotFoundMessage', function () {
 
     const client = new DevcenterClient()
     const msg = await formatArticleNotFoundMessage(client, 'x')
-    expect(msg).to.contain('No x article found.')
-    expect(msg).not.to.contain('Perhaps you meant')
+    expect(msg).toContain('No x article found.')
+    expect(msg).not.toContain('Perhaps you meant')
   })
 })

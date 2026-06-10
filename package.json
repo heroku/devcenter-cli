@@ -40,7 +40,7 @@
     }
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=20"
   },
   "scripts": {
     "build": "npm run clean && tsc && oclif manifest && oclif readme",
@@ -51,14 +51,13 @@
     "posttest": "npm run lint",
     "pretest": "npm run build",
     "readme": "oclif readme",
-    "test": "c8 --all --check-coverage --reporter=lcov --reporter=text-summary mocha --forbid-only \"test/**/*.test.ts\"",
+    "test": "vitest run --coverage",
     "version": "oclif readme && git add README.md"
   },
   "dependencies": {
-    "@heroku-cli/command": "^13.0.0-beta.1",
+    "@heroku-cli/command": "^12.4.1",
     "@heroku/heroku-cli-util": "^10.8.0",
-    "@oclif/core": "^4.3.0",
-    "@oclif/plugin-help": "^6.2.36",
+    "@oclif/core": "^4.0.0",
     "cheerio": "^1.2.0",
     "chokidar": "^5.0.0",
     "debug": "^4.4.3",
@@ -68,32 +67,25 @@
     "open": "^11.0.0",
     "yaml": "^2.8.3"
   },
-  "overrides": {
-    "mocha": {
-      "serialize-javascript": "^7.0.5"
-    }
-  },
   "devDependencies": {
-    "@heroku-cli/test-utils": "^0.2.0",
-    "@types/chai": "^5.2.3",
+    "@heroku-cli/test-utils": "^0.3.0",
+    "@oclif/plugin-help": "^6.2.36",
     "@types/debug": "^4.1.12",
     "@types/express": "^5.0.6",
     "@types/markdown-it": "^14.1.2",
-    "@types/mocha": "^10.0.10",
     "@types/node": "^22.15.3",
     "@types/supertest": "^7.2.0",
+    "@vitest/coverage-v8": "^4.1.8",
     "ansis": "^3.17.0",
-    "c8": "^11.0.0",
-    "chai": "^6.2.2",
     "eslint": "^9.39.4",
     "eslint-config-oclif": "^6.0.156",
-    "eslint-plugin-mocha": "^11.2.0",
-    "mocha": "^11.7.5",
+    "eslint-plugin-vitest": "^0.5.4",
     "nock": "^14.0.12",
-    "oclif": "^4.22.81",
+    "oclif": "^4.23.14",
     "sinon": "^21.0.3",
     "supertest": "^7.2.2",
     "tsx": "^4.21.0",
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "vitest": "^4.1.8"
   }
 }
