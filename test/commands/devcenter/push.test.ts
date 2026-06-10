@@ -1,23 +1,25 @@
 import {runCommand} from '@heroku-cli/test-utils'
-import {expect} from 'chai'
 import nock from 'nock'
 import {mkdtempSync, rmSync, writeFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
+import {
+  afterEach, beforeEach, describe, expect, it,
+} from 'vitest'
 
 import Push from '../../../src/commands/devcenter/push.js'
 import {
   applyHomeEnv, type HomeEnvSnapshot, setHomeDirForTests, snapshotHomeEnv,
 } from '../../helpers/test-home-env.js'
 
-describe('devcenter:push', function () {
+describe('devcenter:push', () => {
   let workDir: string
   let homeEnv: HomeEnvSnapshot
   let previousArticleCwd: string | undefined
   let isolatedHome: string
   let savedHerokuApiKey: string | undefined
 
-  beforeEach(function () {
+  beforeEach(() => {
     homeEnv = snapshotHomeEnv()
     savedHerokuApiKey = process.env.HEROKU_API_KEY
     process.env.HEROKU_API_KEY = 'fake-api-token-for-tests'
@@ -28,7 +30,7 @@ describe('devcenter:push', function () {
     process.env.DEVCENTER_CLI_CWD = workDir
   })
 
-  afterEach(function () {
+  afterEach(() => {
     nock.cleanAll()
     applyHomeEnv(homeEnv)
 
@@ -48,7 +50,7 @@ describe('devcenter:push', function () {
     rmSync(isolatedHome, {recursive: true})
   })
 
-  it('pushes article content through validate and update APIs', async function () {
+  it('pushes article content through validate and update APIs', async () => {
     writeFileSync(
       join(workDir, 'acme.md'),
       `title: Acme Co
@@ -72,10 +74,10 @@ Hello **world**.
       })
 
     const {error} = await runCommand(Push, ['acme'])
-    expect(error).to.equal(undefined)
+    expect(error).toBeUndefined()
   })
 
-  it('logs broken links when the API returns some', async function () {
+  it('logs broken links when the API returns some', async () => {
     writeFileSync(
       join(workDir, 'brk.md'),
       `title: B
@@ -95,11 +97,11 @@ id: 8
       .reply(200, {status: 'draft', title: 'B', url: 'https://devcenter.heroku.com/articles/brk'})
 
     const {error, stdout} = await runCommand(Push, ['brk'])
-    expect(error).to.equal(undefined)
-    expect(stdout).to.contain('broken link')
+    expect(error).toBeUndefined()
+    expect(stdout).toContain('broken link')
   })
 
-  it('fails when validation returns errors', async function () {
+  it('fails when validation returns errors', async () => {
     writeFileSync(join(workDir, 'bad.md'), 'title: X\nid: 11\n\nbody\n', 'utf8')
     nock('https://devcenter.heroku.com')
       .post('/api/v1/private/broken-link-checks.json')
@@ -108,10 +110,10 @@ id: 8
       .reply(200, {title: ['is invalid']})
 
     const {error} = await runCommand(Push, ['bad'])
-    expect(error?.message).to.contain("can't be saved")
+    expect(error?.message).toContain("can't be saved")
   })
 
-  it('fails when update returns an error', async function () {
+  it('fails when update returns an error', async () => {
     writeFileSync(join(workDir, 'up.md'), 'title: U\nid: 12\n\nbody\n', 'utf8')
     nock('https://devcenter.heroku.com')
       .post('/api/v1/private/broken-link-checks.json')
@@ -122,16 +124,16 @@ id: 8
       .reply(422, {error: 'rejected'})
 
     const {error} = await runCommand(Push, ['up'])
-    expect(error?.message).to.contain('rejected')
+    expect(error?.message).toContain('rejected')
   })
 
-  it('errors when the markdown file is missing', async function () {
+  it('errors when the markdown file is missing', async () => {
     const {error} = await runCommand(Push, ['missing'])
-    expect(error?.message).to.contain("Can't find")
-    expect(error?.message).to.contain('missing.md')
+    expect(error?.message).toContain("Can't find")
+    expect(error?.message).toContain('missing.md')
   })
 
-  it('errors when Heroku credentials are not available', async function () {
+  it('errors when Heroku credentials are not available', async () => {
     writeFileSync(join(workDir, 'tok.md'), 'title: T\nid: 1\n\nx\n', 'utf8')
     const homeSnap = snapshotHomeEnv()
     const savedKey = process.env.HEROKU_API_KEY
@@ -140,7 +142,7 @@ id: 8
     setHomeDirForTests(emptyHome)
     try {
       const {error} = await runCommand(Push, ['tok'])
-      expect(error?.message).to.contain('Heroku credentials')
+      expect(error?.message).toContain('Heroku credentials')
     } finally {
       applyHomeEnv(homeSnap)
       if (savedKey === undefined) {
@@ -153,7 +155,7 @@ id: 8
     }
   })
 
-  it('fails when validation returns a non-empty array body', async function () {
+  it('fails when validation returns a non-empty array body', async () => {
     writeFileSync(join(workDir, 'arr.md'), 'title: A\nid: 20\n\nb\n', 'utf8')
     nock('https://devcenter.heroku.com')
       .post('/api/v1/private/broken-link-checks.json')
@@ -162,10 +164,10 @@ id: 8
       .reply(200, [{code: 'invalid'}])
 
     const {error} = await runCommand(Push, ['arr'])
-    expect(error?.message).to.contain("can't be saved")
+    expect(error?.message).toContain("can't be saved")
   })
 
-  it('uses HTTP status when update error body has no error field', async function () {
+  it('uses HTTP status when update error body has no error field', async () => {
     writeFileSync(join(workDir, 'nostr.md'), 'title: N\nid: 21\n\nb\n', 'utf8')
     nock('https://devcenter.heroku.com')
       .post('/api/v1/private/broken-link-checks.json')
@@ -176,10 +178,10 @@ id: 8
       .reply(418, {})
 
     const {error} = await runCommand(Push, ['nostr'])
-    expect(error?.message).to.contain('418')
+    expect(error?.message).toContain('418')
   })
 
-  it('logs archived status when API returns it', async function () {
+  it('logs archived status when API returns it', async () => {
     writeFileSync(join(workDir, 'arc.md'), 'title: Arc\nid: 22\n\nb\n', 'utf8')
     nock('https://devcenter.heroku.com')
       .post('/api/v1/private/broken-link-checks.json')
@@ -194,11 +196,11 @@ id: 8
       })
 
     const {error, stdout} = await runCommand(Push, ['arc'])
-    expect(error).to.equal(undefined)
-    expect(stdout).to.contain('archived')
+    expect(error).toBeUndefined()
+    expect(stdout).toContain('archived')
   })
 
-  it('logs published_quietly status when API returns it', async function () {
+  it('logs published_quietly status when API returns it', async () => {
     writeFileSync(join(workDir, 'pq.md'), 'title: Pq\nid: 23\n\nb\n', 'utf8')
     nock('https://devcenter.heroku.com')
       .post('/api/v1/private/broken-link-checks.json')
@@ -213,11 +215,11 @@ id: 8
       })
 
     const {error, stdout} = await runCommand(Push, ['pq'])
-    expect(error).to.equal(undefined)
-    expect(stdout).to.contain('published quietly')
+    expect(error).toBeUndefined()
+    expect(stdout).toContain('published quietly')
   })
 
-  it('logs staging status when API returns it', async function () {
+  it('logs staging status when API returns it', async () => {
     writeFileSync(join(workDir, 'st.md'), 'title: St\nid: 24\n\nb\n', 'utf8')
     nock('https://devcenter.heroku.com')
       .post('/api/v1/private/broken-link-checks.json')
@@ -232,11 +234,11 @@ id: 8
       })
 
     const {error, stdout} = await runCommand(Push, ['st'])
-    expect(error).to.equal(undefined)
-    expect(stdout).to.contain('staging mode')
+    expect(error).toBeUndefined()
+    expect(stdout).toContain('staging mode')
   })
 
-  it('logs generic completion when update body omits status', async function () {
+  it('logs generic completion when update body omits status', async () => {
     writeFileSync(join(workDir, 'min.md'), 'title: M\nid: 13\n\nbody\n', 'utf8')
     nock('https://devcenter.heroku.com')
       .post('/api/v1/private/broken-link-checks.json')
@@ -247,7 +249,7 @@ id: 8
       .reply(200, {})
 
     const {error, stdout} = await runCommand(Push, ['min'])
-    expect(error).to.equal(undefined)
-    expect(stdout).to.contain('Article update completed')
+    expect(error).toBeUndefined()
+    expect(stdout).toContain('Article update completed')
   })
 })

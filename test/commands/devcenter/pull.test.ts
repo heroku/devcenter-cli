@@ -1,22 +1,24 @@
 import {runCommand} from '@heroku-cli/test-utils'
-import {expect} from 'chai'
 import nock from 'nock'
 import {mkdtempSync, readFileSync, rmSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
+import {
+  afterEach, beforeEach, describe, expect, it,
+} from 'vitest'
 
 import Pull from '../../../src/commands/devcenter/pull.js'
 import {
   applyHomeEnv, type HomeEnvSnapshot, setHomeDirForTests, snapshotHomeEnv,
 } from '../../helpers/test-home-env.js'
 
-describe('devcenter:pull', function () {
+describe('devcenter:pull', () => {
   let workDir: string
   let homeEnv: HomeEnvSnapshot
   let isolatedHome: string
   let previousArticleCwd: string | undefined
 
-  beforeEach(function () {
+  beforeEach(() => {
     homeEnv = snapshotHomeEnv()
     isolatedHome = mkdtempSync(join(tmpdir(), 'devcenter-pull-home-'))
     setHomeDirForTests(isolatedHome)
@@ -25,7 +27,7 @@ describe('devcenter:pull', function () {
     process.env.DEVCENTER_CLI_CWD = workDir
   })
 
-  afterEach(function () {
+  afterEach(() => {
     nock.cleanAll()
     applyHomeEnv(homeEnv)
     if (previousArticleCwd === undefined) {
@@ -38,7 +40,7 @@ describe('devcenter:pull', function () {
     rmSync(isolatedHome, {recursive: true})
   })
 
-  it('writes a local markdown file from the Dev Center API', async function () {
+  it('writes a local markdown file from the Dev Center API', async () => {
     nock('https://devcenter.heroku.com')
       .get('/articles/acme.json')
       .reply(200, {
@@ -49,14 +51,14 @@ describe('devcenter:pull', function () {
       })
 
     const {error} = await runCommand(Pull, ['acme', '--force'])
-    expect(error).to.equal(undefined)
+    expect(error).toBeUndefined()
 
     const written = readFileSync(join(workDir, 'acme.md'), 'utf8')
-    expect(written).to.contain('Acme Co')
-    expect(written).to.contain('Article **body**.')
+    expect(written).toContain('Acme Co')
+    expect(written).toContain('Article **body**.')
   })
 
-  it('errors when the article cannot be loaded', async function () {
+  it('errors when the article cannot be loaded', async () => {
     nock('https://devcenter.heroku.com').get('/articles/nope.json').reply(404, {})
     nock('https://devcenter.heroku.com')
       .get('/api/v1/search.json')
@@ -64,10 +66,10 @@ describe('devcenter:pull', function () {
       .reply(200, {results: []})
 
     const {error} = await runCommand(Pull, ['nope', '--force'])
-    expect(error?.message).to.contain('No nope article found')
+    expect(error?.message).toContain('No nope article found')
   })
 
-  it('retries with Heroku credentials when the public JSON request fails', async function () {
+  it('retries with Heroku credentials when the public JSON request fails', async () => {
     const token = 'fake-pull-token'
     const savedKey = process.env.HEROKU_API_KEY
     process.env.HEROKU_API_KEY = token
@@ -85,8 +87,8 @@ describe('devcenter:pull', function () {
         })
 
       const {error} = await runCommand(Pull, ['draftish', '--force'])
-      expect(error).to.equal(undefined)
-      expect(readFileSync(join(workDir, 'draftish.md'), 'utf8')).to.contain('Draft **body**.')
+      expect(error).toBeUndefined()
+      expect(readFileSync(join(workDir, 'draftish.md'), 'utf8')).toContain('Draft **body**.')
     } finally {
       if (savedKey === undefined) {
         delete process.env.HEROKU_API_KEY
@@ -96,7 +98,7 @@ describe('devcenter:pull', function () {
     }
   })
 
-  it('falls back to private API when public JSON stays unavailable', async function () {
+  it('falls back to private API when public JSON stays unavailable', async () => {
     const token = 'fake-pull-token'
     const savedKey = process.env.HEROKU_API_KEY
     process.env.HEROKU_API_KEY = token
@@ -116,8 +118,8 @@ describe('devcenter:pull', function () {
         })
 
       const {error} = await runCommand(Pull, ['private-only', '--force'])
-      expect(error).to.equal(undefined)
-      expect(readFileSync(join(workDir, 'private-only.md'), 'utf8')).to.contain('From **private** API.')
+      expect(error).toBeUndefined()
+      expect(readFileSync(join(workDir, 'private-only.md'), 'utf8')).toContain('From **private** API.')
     } finally {
       if (savedKey === undefined) {
         delete process.env.HEROKU_API_KEY

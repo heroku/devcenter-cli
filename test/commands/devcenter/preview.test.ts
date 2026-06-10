@@ -1,26 +1,28 @@
 import {runCommand} from '@heroku-cli/test-utils'
-import {expect} from 'chai'
 import childProcess from 'node:child_process'
 import {mkdtempSync, rmSync, writeFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 import {restore, type SinonStub} from 'sinon'
+import {
+  afterEach, beforeEach, describe, expect, it,
+} from 'vitest'
 
 import Preview from '../../../src/commands/devcenter/preview.js'
 import {stubOpen} from '../../helpers/stub-open.js'
 
-describe('devcenter:preview', function () {
+describe('devcenter:preview', () => {
   let workDir: string
   let previousArticleCwd: string | undefined
 
-  beforeEach(function () {
+  beforeEach(() => {
     workDir = mkdtempSync(join(tmpdir(), 'devcenter-preview-cmd-'))
     previousArticleCwd = process.env.DEVCENTER_CLI_CWD
     process.env.DEVCENTER_CLI_CWD = workDir
     stubOpen()
   })
 
-  afterEach(function () {
+  afterEach(() => {
     if (previousArticleCwd === undefined) {
       delete process.env.DEVCENTER_CLI_CWD
     } else {
@@ -31,13 +33,13 @@ describe('devcenter:preview', function () {
     restore()
   })
 
-  it('errors when the markdown file is missing', async function () {
+  it('errors when the markdown file is missing', async () => {
     const {error} = await runCommand(Preview, ['missing'])
-    expect(error?.message).to.contain("Can't find")
-    expect(error?.message).to.contain('missing.md')
+    expect(error?.message).toContain("Can't find")
+    expect(error?.message).toContain('missing.md')
   })
 
-  it('starts preview server and exits on SIGINT', async function () {
+  it('starts preview server and exits on SIGINT', async () => {
     writeFileSync(
       join(workDir, 'live.md'),
       `title: Live
@@ -54,7 +56,7 @@ content
     }, 300)
     const {error} = await run
     clearTimeout(t)
-    expect(error).to.equal(undefined)
-    expect((childProcess.spawn as SinonStub).called).to.equal(true)
+    expect(error).toBeUndefined()
+    expect((childProcess.spawn as SinonStub).called).toBe(true)
   })
 })

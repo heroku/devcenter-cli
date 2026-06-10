@@ -2,6 +2,10 @@ name: CI Test Suite
 
 on:
   push:
+    # Only run on pushes to main branches and long-lived feature branches
+    # PRs will trigger via pull_request event to avoid duplicate runs
+    branches:
+      - main
   pull_request:
   workflow_dispatch:
 
@@ -10,7 +14,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        node_version: ['22.x', '24.x']
+        node_version: ["22.x", "24.x"]
         os: [ubuntu-latest, macos-latest, windows-latest]
       fail-fast: false
     steps:

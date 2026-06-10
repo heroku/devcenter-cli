@@ -1,12 +1,12 @@
-import {expect} from 'chai'
 import {mkdtempSync, rmSync, writeFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
+import {describe, expect, it} from 'vitest'
 
 import {ArticleFile} from '../../src/lib/article-file.js'
 
-describe('ArticleFile', function () {
-  it('reads YAML front matter and markdown body', function () {
+describe('ArticleFile', () => {
+  it('reads YAML front matter and markdown body', () => {
     const dir = mkdtempSync(join(tmpdir(), 'devcenter-article-'))
     try {
       const p = join(dir, 'sample.md')
@@ -20,16 +20,16 @@ id: 42
         'utf8',
       )
       const article = ArticleFile.read(p)
-      expect(article.metadata.title).to.equal('Hello')
-      expect(article.metadata.id).to.equal(42)
-      expect(article.content.trim()).to.equal('# Body here')
-      expect(article.html).to.contain('Body here')
+      expect(article.metadata.title).toBe('Hello')
+      expect(article.metadata.id).toBe(42)
+      expect(article.content.trim()).toBe('# Body here')
+      expect(article.html).toContain('Body here')
     } finally {
       rmSync(dir, {recursive: true})
     }
   })
 
-  it('renders inline markdown to HTML', function () {
+  it('renders inline markdown to HTML', () => {
     const dir = mkdtempSync(join(tmpdir(), 'devcenter-article-'))
     try {
       const p = join(dir, 'bold.md')
@@ -43,18 +43,18 @@ Hello **world**
         'utf8',
       )
       const a = ArticleFile.read(p)
-      expect(a.html).to.contain('strong')
+      expect(a.html).toContain('strong')
     } finally {
       rmSync(dir, {recursive: true})
     }
   })
 
-  it('read throws when the file has no YAML/content separator', function () {
+  it('read throws when the file has no YAML/content separator', () => {
     const dir = mkdtempSync(join(tmpdir(), 'devcenter-article-'))
     try {
       const p = join(dir, 'bad.md')
       writeFileSync(p, 'not valid article format', 'utf8')
-      expect(() => ArticleFile.read(p)).to.throw(/Invalid article file/)
+      expect(() => ArticleFile.read(p)).toThrow(/Invalid article file/)
     } finally {
       rmSync(dir, {recursive: true})
     }
