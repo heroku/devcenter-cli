@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.0.2](https://github.com/heroku/devcenter-cli/compare/plugin-devcenter-v2.0.1...plugin-devcenter-v2.0.2) (2026-07-16)
+
+
+### Dependencies
+
+* bump @opentelemetry/core and @sentry/node ([#72](https://github.com/heroku/devcenter-cli/issues/72)) ([3cc9650](https://github.com/heroku/devcenter-cli/commit/3cc9650572af7c5666124e52c0bf99e343e2ed44))
+* bump esbuild and tsx ([#70](https://github.com/heroku/devcenter-cli/issues/70)) ([4a28661](https://github.com/heroku/devcenter-cli/commit/4a286611afdc090fdf8e934d94ef3eec2cc2ab67))
+* bump form-data from 4.0.5 to 4.0.6 ([#75](https://github.com/heroku/devcenter-cli/issues/75)) ([27b1db4](https://github.com/heroku/devcenter-cli/commit/27b1db4284930c55c1172628e08dce0619a970bb))
+* bump linkify-it from 5.0.0 to 5.0.1 ([#80](https://github.com/heroku/devcenter-cli/issues/80)) ([1a778e0](https://github.com/heroku/devcenter-cli/commit/1a778e01b281910d83b1636b91e9dd2715b1ae07))
+* bump markdown-it from 14.1.1 to 14.2.0 ([#73](https://github.com/heroku/devcenter-cli/issues/73)) ([d97c9c9](https://github.com/heroku/devcenter-cli/commit/d97c9c9f1bb57b19c5a8673cbda9c3e2b81e290c))
+* bump undici from 7.24.7 to 7.28.0 ([#74](https://github.com/heroku/devcenter-cli/issues/74)) ([1a6e33c](https://github.com/heroku/devcenter-cli/commit/1a6e33ca69f13a3565e4be17ed24b17f2235bf7c))
+
 ## [2.0.1](https://github.com/heroku/devcenter-cli/compare/plugin-devcenter-v2.0.0...plugin-devcenter-v2.0.1) (2026-06-11)
 
 
