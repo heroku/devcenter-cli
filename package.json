@@ -82,7 +82,7 @@
     "eslint-plugin-vitest": "^0.5.4",
     "nock": "^14.0.12",
     "oclif": "^4.23.14",
-    "sinon": "^21.0.3",
+    "sinon": "^22.1.0",
     "supertest": "^7.2.2",
     "tsx": "^4.21.0",
     "typescript": "^5.4.0",
