@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.0.4](https://github.com/heroku/devcenter-cli/compare/plugin-devcenter-v2.0.3...plugin-devcenter-v2.0.4) (2026-09-11)
+
+
+### Dependencies
+
+* bump open from 11.0.0 to 11.0.2 ([#102](https://github.com/heroku/devcenter-cli/issues/102)) ([88f50c9](https://github.com/heroku/devcenter-cli/commit/88f50c99bd9f8d9ae873d05c754fba58bd80c74b))
+* bump qs from 6.15.2 to 6.16.0 ([#105](https://github.com/heroku/devcenter-cli/issues/105)) ([07949d9](https://github.com/heroku/devcenter-cli/commit/07949d9f15155070c036bf08b67d1e7f4d2ed880))
+
 ## [2.0.3](https://github.com/heroku/devcenter-cli/compare/plugin-devcenter-v2.0.2...plugin-devcenter-v2.0.3) (2026-08-20)
 
 
