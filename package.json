@@ -28,6 +28,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "oclif": {
+    "repositoryPrefix": "<%- repo %>/blob/plugin-devcenter-v<%- version %>/<%- commandPath %>",
     "bin": "heroku",
     "commands": "./dist/commands",
     "devPlugins": [
