@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.0.5](https://github.com/heroku/devcenter-cli/compare/plugin-devcenter-v2.0.4...plugin-devcenter-v2.0.5) (2026-10-01)
+
+
+### Bug Fixes
+
+* correct broken source links in generated command docs ([#121](https://github.com/heroku/devcenter-cli/issues/121)) ([a92c115](https://github.com/heroku/devcenter-cli/commit/a92c115124b4c5de28750266573d054ebc6ad2d5))
+
+
+### Dependencies
+
+* bump @heroku-cli/command from 12.4.1 to 13.2.2 ([#116](https://github.com/heroku/devcenter-cli/issues/116)) ([bfe99c0](https://github.com/heroku/devcenter-cli/commit/bfe99c005f41b2a3d55a019b5020fdb3b31c803f))
+* bump undici from 7.29.0 to 7.30.0 ([#119](https://github.com/heroku/devcenter-cli/issues/119)) ([d4e8a19](https://github.com/heroku/devcenter-cli/commit/d4e8a195716fa17ce62e090f365e2092f78ee79b))
+
 ## [2.0.4](https://github.com/heroku/devcenter-cli/compare/plugin-devcenter-v2.0.3...plugin-devcenter-v2.0.4) (2026-09-22)
 
 
