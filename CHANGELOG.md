@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.6](https://github.com/heroku/devcenter-cli/compare/plugin-devcenter-v2.0.5...plugin-devcenter-v2.0.6) (2026-10-02)
+
+
+### Dependencies
+
+* bump markdown-it from 14.1.1 to 14.3.1 ([#124](https://github.com/heroku/devcenter-cli/issues/124)) ([4e1f9fb](https://github.com/heroku/devcenter-cli/commit/4e1f9fbdd2478db9dbcda9248742684bd4fc4801))
+
 ## [2.0.5](https://github.com/heroku/devcenter-cli/compare/plugin-devcenter-v2.0.4...plugin-devcenter-v2.0.5) (2026-10-01)
 
 
