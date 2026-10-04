@@ -78,7 +78,7 @@
     "@types/markdown-it": "^14.1.2",
     "@types/node": "^26.2.0",
     "@types/supertest": "^7.2.0",
-    "@vitest/coverage-v8": "^4.1.8",
+    "@vitest/coverage-v8": "^5.0.3",
     "ansis": "^4.3.1",
     "eslint": "^9.39.4",
     "eslint-config-oclif": "^6.0.156",
