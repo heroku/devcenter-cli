@@ -82,6 +82,14 @@ export default class Push extends Command {
 
     const validated = await client.validateArticle(token, article.metadata.id, formParams)
     dbg(`Validation response: status=${validated.status} ok=${validated.ok}`)
+    if (validated.status === 401 || validated.status === 403) {
+      const errBody = validated.body as {error?: string}
+      this.error(
+        `Error pushing "${slug}": ${errBody.error ?? 'Access denied'} (${validated.status}). Check your credentials with \`heroku auth:whoami\`.`,
+        {exit: 1},
+      )
+    }
+
     if (hasValidationErrors(validated.body)) {
       const dumped = stringifyYaml(validated.body)
       this.error(`The article "${slug}" can't be saved:\n${dumped}`, {exit: 1})

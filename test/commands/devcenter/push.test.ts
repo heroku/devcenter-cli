@@ -113,6 +113,20 @@ id: 8
     expect(error?.message).toContain("can't be saved")
   })
 
+  it.each([401, 403])('reports an access error when validation returns %i', async status => {
+    writeFileSync(join(workDir, 'denied.md'), 'title: D\nid: 30\n\nbody\n', 'utf8')
+    nock('https://devcenter.heroku.com')
+      .post('/api/v1/private/broken-link-checks.json')
+      .reply(status, {error: 'Access denied'})
+      .post('/api/v1/private/articles/30/validate.json')
+      .reply(status, {error: 'Access denied'})
+
+    const {error} = await runCommand(Push, ['denied'])
+    expect(error?.message).not.toContain("can't be saved")
+    expect(error?.message).toContain(`Error pushing "denied": Access denied (${status})`)
+    expect(error?.message).toContain('heroku auth:whoami')
+  })
+
   it('fails when update returns an error', async () => {
     writeFileSync(join(workDir, 'up.md'), 'title: U\nid: 12\n\nbody\n', 'utf8')
     nock('https://devcenter.heroku.com')
