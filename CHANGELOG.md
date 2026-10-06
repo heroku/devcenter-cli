@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.7](https://github.com/heroku/devcenter-cli/compare/plugin-devcenter-v2.0.6...plugin-devcenter-v2.0.7) (2026-10-06)
+
+
+### Bug Fixes
+
+* send heroku token as basic auth password to dev center private api ([#131](https://github.com/heroku/devcenter-cli/issues/131)) ([7a8158c](https://github.com/heroku/devcenter-cli/commit/7a8158c91010b14830823fbcac8e7126a2073246))
+
 ## [2.0.6](https://github.com/heroku/devcenter-cli/compare/plugin-devcenter-v2.0.5...plugin-devcenter-v2.0.6) (2026-10-02)
 
 
