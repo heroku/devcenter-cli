@@ -26,6 +26,15 @@ function hasValidationErrors(body: unknown): boolean {
   return false
 }
 
+function accessErrorMessage(slug: string, response: {body: unknown; status: number}): string | undefined {
+  if (response.status !== 401 && response.status !== 403) {
+    return undefined
+  }
+
+  const errBody = response.body as {error?: string}
+  return `Error pushing "${slug}": ${errBody.error ?? 'Access denied'} (${response.status}). Check your credentials with \`heroku auth:whoami\`.`
+}
+
 type UpdateBody = {
   error?: string
   status?: string
@@ -69,7 +78,12 @@ export default class Push extends Command {
     dbg(`Pushing article id=${article.metadata.id} title="${article.metadata.title}"`)
 
     const broken = await client.checkBrokenLinks(token, article.content)
-    dbg(`Broken link check: ${Array.isArray(broken.body) ? broken.body.length : 0} issues`)
+    dbg(`Broken link check: status=${broken.status} ${Array.isArray(broken.body) ? broken.body.length : 0} issues`)
+    const brokenLinksAccessError = accessErrorMessage(slug, broken)
+    if (brokenLinksAccessError) {
+      this.error(brokenLinksAccessError, {exit: 1})
+    }
+
     const links = broken.body
     if (Array.isArray(links) && links.length > 0) {
       this.log(`The article "${slug}" contains broken link/s:`)
@@ -82,12 +96,9 @@ export default class Push extends Command {
 
     const validated = await client.validateArticle(token, article.metadata.id, formParams)
     dbg(`Validation response: status=${validated.status} ok=${validated.ok}`)
-    if (validated.status === 401 || validated.status === 403) {
-      const errBody = validated.body as {error?: string}
-      this.error(
-        `Error pushing "${slug}": ${errBody.error ?? 'Access denied'} (${validated.status}). Check your credentials with \`heroku auth:whoami\`.`,
-        {exit: 1},
-      )
+    const validateAccessError = accessErrorMessage(slug, validated)
+    if (validateAccessError) {
+      this.error(validateAccessError, {exit: 1})
     }
 
     if (hasValidationErrors(validated.body)) {
