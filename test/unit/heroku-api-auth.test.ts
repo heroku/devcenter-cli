@@ -6,8 +6,8 @@ import {
 } from '../../src/lib/heroku-api-auth.js'
 
 describe('heroku-api-auth', () => {
-  it('basicAuthHeaderValue matches legacy encoding', () => {
-    expect(basicAuthHeaderValue('tok')).toBe(`Basic ${Buffer.from('tok').toString('base64')}`)
+  it('basicAuthHeaderValue encodes the token as the password with an empty user', () => {
+    expect(basicAuthHeaderValue('tok')).toBe(`Basic ${Buffer.from(':tok').toString('base64')}`)
   })
 
   it('basicAuthHeaders sets Authorization', () => {

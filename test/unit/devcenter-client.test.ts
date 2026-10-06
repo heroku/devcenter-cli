@@ -31,7 +31,7 @@ describe('DevcenterClient', () => {
 
   it('getJson sends Authorization when token is passed', async () => {
     nock('https://devcenter.heroku.com', {
-      reqheaders: {authorization: `Basic ${Buffer.from('secret').toString('base64')}`},
+      reqheaders: {authorization: `Basic ${Buffer.from(':secret').toString('base64')}`},
     })
       .get('/articles/z.json')
       .reply(200, {

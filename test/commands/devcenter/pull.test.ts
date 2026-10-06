@@ -76,7 +76,7 @@ describe('devcenter:pull', () => {
     try {
       nock('https://devcenter.heroku.com').get('/articles/draftish.json').reply(404, {})
       nock('https://devcenter.heroku.com', {
-        reqheaders: {authorization: `Basic ${Buffer.from(token).toString('base64')}`},
+        reqheaders: {authorization: `Basic ${Buffer.from(`:${token}`).toString('base64')}`},
       })
         .get('/articles/draftish.json')
         .reply(200, {
@@ -102,7 +102,7 @@ describe('devcenter:pull', () => {
     const token = 'fake-pull-token'
     const savedKey = process.env.HEROKU_API_KEY
     process.env.HEROKU_API_KEY = token
-    const auth = {authorization: `Basic ${Buffer.from(token).toString('base64')}`}
+    const auth = {authorization: `Basic ${Buffer.from(`:${token}`).toString('base64')}`}
     try {
       nock('https://devcenter.heroku.com').get('/articles/private-only.json').reply(401, {error: 'Authentication required'})
       nock('https://devcenter.heroku.com', {reqheaders: auth})
