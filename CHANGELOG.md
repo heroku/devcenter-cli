@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.8](https://github.com/heroku/devcenter-cli/compare/plugin-devcenter-v2.0.7...plugin-devcenter-v2.0.8) (2026-10-12)
+
+
+### Dependencies
+
+* bump proxy-addr from 2.0.7 to 2.0.8 ([#134](https://github.com/heroku/devcenter-cli/issues/134)) ([696ea07](https://github.com/heroku/devcenter-cli/commit/696ea072d1b97dd059fd3bfa36f5870c963eb9c9))
+
 ## [2.0.7](https://github.com/heroku/devcenter-cli/compare/plugin-devcenter-v2.0.6...plugin-devcenter-v2.0.7) (2026-10-06)
 
 
