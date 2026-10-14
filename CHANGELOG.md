@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.9](https://github.com/heroku/devcenter-cli/compare/plugin-devcenter-v2.0.8...plugin-devcenter-v2.0.9) (2026-10-14)
+
+
+### Dependencies
+
+* bump @heroku/heroku-cli-util from 10.10.0 to 10.10.1 ([#130](https://github.com/heroku/devcenter-cli/issues/130)) ([630aa73](https://github.com/heroku/devcenter-cli/commit/630aa73ad69cfadff3ba3fe37b7898fff0d56b52))
+
 ## [2.0.8](https://github.com/heroku/devcenter-cli/compare/plugin-devcenter-v2.0.7...plugin-devcenter-v2.0.8) (2026-10-12)
 
 
