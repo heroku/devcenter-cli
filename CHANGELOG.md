@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.0.9](https://github.com/heroku/devcenter-cli/compare/plugin-devcenter-v2.0.8...plugin-devcenter-v2.0.9) (2026-10-29)
+
+
+### Dependencies
+
+* bump @heroku/heroku-cli-util from 10.10.0 to 10.10.1 ([#130](https://github.com/heroku/devcenter-cli/issues/130)) ([630aa73](https://github.com/heroku/devcenter-cli/commit/630aa73ad69cfadff3ba3fe37b7898fff0d56b52))
+* bump body-parser from 2.3.0 to 2.4.0 ([#143](https://github.com/heroku/devcenter-cli/issues/143)) ([3e8b0ed](https://github.com/heroku/devcenter-cli/commit/3e8b0eda29772f5b4dd8297b30371fa9d981fdcd))
+* bump markdown-it from 14.3.2 to 14.3.3 ([#142](https://github.com/heroku/devcenter-cli/issues/142)) ([da2cc11](https://github.com/heroku/devcenter-cli/commit/da2cc112d2843f32742b93a435b7c289106f188a))
+* bump undici from 7.30.0 to 7.30.1 ([#144](https://github.com/heroku/devcenter-cli/issues/144)) ([37e16c1](https://github.com/heroku/devcenter-cli/commit/37e16c193f2857ec19fe9cd95a6a6feed2a8b230))
+
 ## [2.0.8](https://github.com/heroku/devcenter-cli/compare/plugin-devcenter-v2.0.7...plugin-devcenter-v2.0.8) (2026-10-12)
 
 
