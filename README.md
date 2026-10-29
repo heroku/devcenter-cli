@@ -17,7 +17,7 @@ $ npm install -g @heroku-cli/plugin-devcenter
 $ heroku COMMAND
 running command...
 $ heroku (--version)
-@heroku-cli/plugin-devcenter/2.0.8 linux-x64 node-v22.23.3
+@heroku-cli/plugin-devcenter/2.0.9 linux-x64 node-v22.23.4
 $ heroku --help [COMMAND]
 USAGE
   $ heroku COMMAND
